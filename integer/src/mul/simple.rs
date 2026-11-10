@@ -240,24 +240,42 @@ fn add_mul_chunk(c: &mut [Word], a: &[Word], b: &[Word]) -> bool {
     debug_assert!(a.len() < 2 * CHUNK_LEN);
     let n = a.len();
     let mut overflow = false;
-    let mut i = 0;
 
-    // Consume the multiplier two words at a time via the add_mul_dword_same_len_in_place kernel.
-    let mut pairs = b.chunks_exact(2);
-    for pair in &mut pairs {
-        let (carry_lo, carry_hi) =
-            add_mul_dword_same_len_in_place(&mut c[i..i + n], a, pair[0], pair[1]);
-        overflow |= add::add_dword_in_place(&mut c[i + n..], double_word(carry_lo, carry_hi));
-        i += 2;
+    // wasm32 has a cheap widening u32 x u32 -> u64 product, but pairing two
+    // multiplier words makes every accumulator step carry two dependent
+    // chains. A single row per sweep exposes the direct i64 multiply/add/shift
+    // recurrence and is faster for the 50--150-word products in the mp core.
+    #[cfg(any(target_pointer_width = "32", force_bits = "32"))]
+    {
+        for (i, &m) in b.iter().enumerate() {
+            let carry = add_mul_word_same_len_in_place(&mut c[i..i + n], m, a);
+            overflow |= add::add_word_in_place(&mut c[i + n..], carry);
+        }
+        return overflow;
     }
 
-    // Handle the leftover odd multiplier word with a plain add_mul_word_same_len_in_place.
-    if let &[m] = pairs.remainder() {
-        let carry_word = add_mul_word_same_len_in_place(&mut c[i..i + n], m, a);
-        overflow |= add::add_word_in_place(&mut c[i + n..], carry_word);
-    }
+    #[cfg(not(any(target_pointer_width = "32", force_bits = "32")))]
+    {
+        let mut i = 0;
 
-    overflow
+        // Consume the multiplier two words at a time via the add_mul_dword_same_len_in_place kernel.
+        let mut pairs = b.chunks_exact(2);
+        for pair in &mut pairs {
+            let (carry_lo, carry_hi) =
+                add_mul_dword_same_len_in_place(&mut c[i..i + n], a, pair[0], pair[1]);
+            overflow |=
+                add::add_dword_in_place(&mut c[i + n..], double_word(carry_lo, carry_hi));
+            i += 2;
+        }
+
+        // Handle the leftover odd multiplier word with a plain add_mul_word_same_len_in_place.
+        if let &[m] = pairs.remainder() {
+            let carry_word = add_mul_word_same_len_in_place(&mut c[i..i + n], m, a);
+            overflow |= add::add_word_in_place(&mut c[i + n..], carry_word);
+        }
+
+        overflow
+    }
 }
 
 /// `words[..n] -= rhs[..n] * (mult0 + mult1 * B)`, where `n == rhs.len()`.
@@ -343,24 +361,38 @@ fn sub_mul_chunk(c: &mut [Word], a: &[Word], b: &[Word]) -> bool {
     debug_assert!(a.len() < 2 * CHUNK_LEN);
     let n = a.len();
     let mut borrow_out = false;
-    let mut i = 0;
 
-    // Consume the multiplier two words at a time via the sub_mul_dword_same_len_in_place kernel.
-    let mut pairs = b.chunks_exact(2);
-    for pair in &mut pairs {
-        let (carry_lo, carry_hi) =
-            sub_mul_dword_same_len_in_place(&mut c[i..i + n], a, pair[0], pair[1]);
-        borrow_out |= add::sub_dword_in_place(&mut c[i + n..], double_word(carry_lo, carry_hi));
-        i += 2;
+    #[cfg(any(target_pointer_width = "32", force_bits = "32"))]
+    {
+        for (i, &m) in b.iter().enumerate() {
+            let borrow = sub_mul_word_same_len_in_place(&mut c[i..i + n], m, a);
+            borrow_out |= add::sub_word_in_place(&mut c[i + n..], borrow);
+        }
+        return borrow_out;
     }
 
-    // Handle the leftover odd multiplier word with a plain submul_1.
-    if let &[m] = pairs.remainder() {
-        let borrow_word = sub_mul_word_same_len_in_place(&mut c[i..i + n], m, a);
-        borrow_out |= add::sub_word_in_place(&mut c[i + n..], borrow_word);
-    }
+    #[cfg(not(any(target_pointer_width = "32", force_bits = "32")))]
+    {
+        let mut i = 0;
 
-    borrow_out
+        // Consume the multiplier two words at a time via the sub_mul_dword_same_len_in_place kernel.
+        let mut pairs = b.chunks_exact(2);
+        for pair in &mut pairs {
+            let (carry_lo, carry_hi) =
+                sub_mul_dword_same_len_in_place(&mut c[i..i + n], a, pair[0], pair[1]);
+            borrow_out |=
+                add::sub_dword_in_place(&mut c[i + n..], double_word(carry_lo, carry_hi));
+            i += 2;
+        }
+
+        // Handle the leftover odd multiplier word with a plain submul_1.
+        if let &[m] = pairs.remainder() {
+            let borrow_word = sub_mul_word_same_len_in_place(&mut c[i..i + n], m, a);
+            borrow_out |= add::sub_word_in_place(&mut c[i + n..], borrow_word);
+        }
+
+        borrow_out
+    }
 }
 
 #[cfg(test)]
@@ -369,6 +401,60 @@ mod tests {
     use crate::arch::word::Word;
     use alloc::vec::Vec;
     use rand_v08::{rngs::StdRng, Rng, SeedableRng};
+
+    #[cfg(any(target_pointer_width = "32", force_bits = "32"))]
+    fn schoolbook_reference(a: &[Word], b: &[Word]) -> Vec<Word> {
+        debug_assert_eq!(Word::BITS, 32);
+        let mut columns = vec![0u128; a.len() + b.len()];
+        for (i, &x) in a.iter().enumerate() {
+            for (j, &y) in b.iter().enumerate() {
+                columns[i + j] += (x as u128) * (y as u128);
+            }
+        }
+        let mut carry = 0u128;
+        columns
+            .into_iter()
+            .map(|column| {
+                let value = column + carry;
+                carry = value >> Word::BITS;
+                value as Word
+            })
+            .collect()
+    }
+
+    #[test]
+    #[cfg(any(target_pointer_width = "32", force_bits = "32"))]
+    fn wasm32_single_row_chunk_matches_schoolbook() {
+        for smaller in [1, 2, 3, 7, 15, 24, 25, 31, 32] {
+            let larger = smaller + 3;
+            for seed in [0, 1, 0x9e37_79b9_u64] {
+                let mut rng = StdRng::seed_from_u64(seed ^ smaller as u64);
+                let a: Vec<Word> = (0..larger).map(|_| rng.gen()).collect();
+                let b: Vec<Word> = (0..smaller).map(|_| rng.gen()).collect();
+                let expected = schoolbook_reference(&a, &b);
+                let mut actual = vec![0; larger + smaller];
+                assert!(!add_mul_chunk(&mut actual, &a, &b));
+                assert_eq!(actual, expected, "add mismatch at {larger}x{smaller}");
+                assert!(!sub_mul_chunk(&mut actual, &a, &b));
+                assert!(actual.iter().all(|&word| word == 0));
+            }
+        }
+    }
+
+    #[test]
+    #[cfg(any(target_pointer_width = "32", force_bits = "32"))]
+    fn wasm32_dispatch_boundaries_match_schoolbook() {
+        use crate::UBig;
+
+        for words in [31, 32, 33, 191, 192, 193] {
+            let a = vec![Word::MAX; words];
+            let b: Vec<Word> = (0..words)
+                .map(|i| (i as Word).wrapping_mul(0x9e37_79b9) | 1)
+                .collect();
+            let expected = UBig::from_words(&schoolbook_reference(&a, &b));
+            assert_eq!(&UBig::from_words(&a) * &UBig::from_words(&b), expected);
+        }
+    }
 
     /// Independent reference for `words[..n] += rhs[..n] * (m0 + m1 * B)` (B = 2^Word::BITS),
     /// returning the full `n + 2` result limbs (low `n` are the updated words, the top two are

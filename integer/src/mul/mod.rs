@@ -13,6 +13,9 @@ use core::mem;
 use static_assertions::const_assert;
 
 /// If smaller operand length <= this, simple multiplication will be used.
+#[cfg(any(target_pointer_width = "32", force_bits = "32"))]
+const THRESHOLD_SIMPLE_DEFAULT: usize = 32;
+#[cfg(not(any(target_pointer_width = "32", force_bits = "32")))]
 const THRESHOLD_SIMPLE_DEFAULT: usize = 24;
 const_assert!(THRESHOLD_SIMPLE_DEFAULT <= simple::MAX_SMALLER_LEN);
 const_assert!(THRESHOLD_SIMPLE_DEFAULT + 1 >= karatsuba::MIN_LEN);
@@ -20,6 +23,9 @@ const_assert!(THRESHOLD_SIMPLE_DEFAULT + 1 >= karatsuba::MIN_LEN);
 /// If smaller operand length <= this, Karatsuba multiplication will be used.
 /// Tuned so that Toom-3 kicks in earlier (~96 words vs the old 192),
 /// closing the gap with malachite/rug at ~10000-bit sizes.
+#[cfg(any(target_pointer_width = "32", force_bits = "32"))]
+const THRESHOLD_KARATSUBA_DEFAULT: usize = 192;
+#[cfg(not(any(target_pointer_width = "32", force_bits = "32")))]
 const THRESHOLD_KARATSUBA_DEFAULT: usize = 96;
 const_assert!(THRESHOLD_KARATSUBA_DEFAULT + 1 >= toom_3::MIN_LEN);
 
