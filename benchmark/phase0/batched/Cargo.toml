@@ -1,0 +1,22 @@
+[package]
+name = "phase0-batched"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+# (its own workspace: a standalone measuring crate, not a member of dashu's)
+[workspace]
+
+[[bin]]
+name = "phase0-batched"
+path = "src/main.rs"
+
+# Sagebrush's own multimodular code, pinned to the master commit measured (public repository)
+[dependencies]
+sagebrush-arith = { git = "https://github.com/sagemathinc/sagebrush", rev = "4d4225f9a34669b70e88f600bc1960303eee79a5" }
+sagebrush-bigint = { git = "https://github.com/sagemathinc/sagebrush", rev = "4d4225f9a34669b70e88f600bc1960303eee79a5" }
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1

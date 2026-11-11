@@ -1,0 +1,21 @@
+[package]
+name = "phase0-kernels"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+# (its own workspace: a standalone measuring crate, not a member of dashu's)
+[workspace]
+
+[[bin]]
+name = "phase0-kernels"
+path = "src/main.rs"
+
+[dependencies]
+dashu-int = { path = "../../../integer" }
+dashu-base = { path = "../../../base" }
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1

@@ -1,0 +1,17 @@
+    14.29%  python3.12        [.] 0x000000000021d988
+     9.52%  python3.12        [.] 0x000000000014e751
+     9.52%  python3.12        [.] 0x000000000021d9e8
+     4.76%  libc.so.6         [.] _int_free
+     4.76%  python3.12        [.] PyDict_Next
+     4.76%  python3.12        [.] PyObject_IS_GC
+     4.76%  python3.12        [.] _PyEval_EvalFrameDefault
+     4.76%  python3.12        [.] _PyObject_VisitManagedDict
+     4.76%  python3.12        [.] _Py_HashBytes
+     4.76%  python3.12        [.] 0x000000000014e7a1
+     4.76%  python3.12        [.] 0x0000000000159866
+     4.76%  python3.12        [.] 0x0000000000176054
+     4.76%  python3.12        [.] 0x00000000001a8464
+     4.76%  python3.12        [.] 0x000000000021cb5d
+     4.76%  python3.12        [.] 0x000000000021d0dd
+     4.76%  python3.12        [.] 0x000000000021d9ef
+     4.76%  python3.12        [.] 0x000000000021da10

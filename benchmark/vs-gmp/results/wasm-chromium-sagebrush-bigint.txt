@@ -1,0 +1,44 @@
+== sagebrush-bigint, wasm32, Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/149.0.0.0 Safari/537.36
+1000 mul 8.646e-6
+1000 div 1.410e-5
+1000 sqrt 1.160e-5
+1000 to_str 2.019e-5
+1000 from_str 5.095e-6
+10000 mul 3.120e-4
+10000 div 6.234e-4
+10000 sqrt 4.156e-4
+10000 to_str 7.420e-4
+10000 from_str 4.368e-4
+100000 mul 7.037e-3
+100000 div 2.664e-2
+100000 sqrt 1.754e-2
+100000 to_str 2.652e-2
+100000 from_str 1.562e-2
+1000000 mul 6.690e-2
+1000000 div 5.616e-1
+1000000 sqrt 4.353e-1
+1000000 to_str 8.290e-1
+1000000 from_str 3.114e-1
+== GMP via Pyodide gmpy2
+Pyodide 314.0.7
+gmpy2 2.3.0 GMP 6.3.0
+1000 mul 1.104e-04
+1000 div 2.027e-04
+1000 sqrt 6.573e-05
+1000 to_str 1.329e-04
+1000 from_str 1.003e-04
+10000 mul 2.960e-03
+10000 div 7.846e-03
+10000 sqrt 3.922e-03
+10000 to_str 6.503e-03
+10000 from_str 3.687e-03
+100000 mul 3.772e-02
+100000 div 1.132e-01
+100000 sqrt 1.018e-01
+100000 to_str 2.086e-01
+100000 from_str 9.647e-02
+1000000 mul 7.164e-01
+1000000 div 1.906e+00
+1000000 sqrt 1.442e+00
+1000000 to_str 3.949e+00
+1000000 from_str 1.518e+00
