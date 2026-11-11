@@ -10,7 +10,7 @@ Phase 0 of Sagebrush's big-integer plan (`design/bigint-plan.md`, item W0). It i
   - F4 over $\mathbb{Q}$ spends **55 to 61%** of its single-thread time in big-integer arithmetic, plus 13 to 16% in allocation and copying.
   - A class group computation in a quintic number field spends **66%** there.
   - By the plan's stop rule, that is a reason to go on past Phase 2.
-- **The cost is at small and medium sizes, in the multimodular steps, not in huge numbers.** In F4 the top items are:
+- **The hot functions are the multimodular steps' small-operand ones.** In F4 the top items are:
   - gcds, for normalizing rationals;
   - the CRT lift;
   - building integers from limb buffers;
@@ -18,7 +18,7 @@ Phase 0 of Sagebrush's big-integer plan (`design/bigint-plan.md`, item W0). It i
   - `malloc`/`free`;
   - one-word-by-many multiplications.
   
-  No profiled workload spent visible time in numbers of $10^4$ digits or more.
+  Operand sizes are not yet measured: self-time by function does not show them (a one-word remainder can take a dividend of any size), and the size histogram is still to do.
 - **ECM has its own integer arithmetic.** Factoring spends 99% of its time in `sagebrush_classgroup::nf::ecm::Mont`, a fixed-size Montgomery multiplication written inside the class-group crate. It is integer arithmetic outside the shared crate. The shared-crate rule says it belongs in `sagebrush-bigint`, as the reusable-inverse context of plan item W4b.
 - **Next to GMP, at the sizes that matter** (1 to 128 words):
   - dashu is 1.2 to 3.5 times slower than GMP with assembly on multiplication, multiply-and-add and modular powers at every size, and on division from 4 words up (2n/n division also at 2 words). It is faster only on division at the smallest sizes: by one word at 1 to 2 words, and 2n/n at 1 word;
@@ -30,7 +30,7 @@ Phase 0 of Sagebrush's big-integer plan (`design/bigint-plan.md`, item W0). It i
   - CRT reconstruction is 1.6 to 2.6 times slower;
   - dot products are 1.4 to 3.2 times slower;
   - rational reconstruction is 2.4 to 3.6 times slower, and slower even than GMP without assembly.
-- **The Python-to-engine boundary costs 20 to 40 times more than it needs to at large sizes.** Big integers cross it as decimal strings in JSON; hex would do the same job far faster.
+- **At the Python-to-engine boundary, decimal conversion costs 3.3 to 37 times what hex would**, from 16 to 5,191 words. That is the conversion component alone, timed in isolation, not a measured whole-boundary saving: big integers cross as decimal strings in JSON, and the engine call's other costs were not measured.
 
 ## Part D: where real workloads spend their time
 
@@ -94,11 +94,13 @@ Times are ns per operation, as the ratio dashu ÷ GMP 6.3.0 with assembly. In pa
 | 64 | 1.68 (0.43) | 1.64 (0.42) | 1.67 (0.92) | 1.78 (0.60) | 1.05 (0.54) | 1.44 (0.54) | 1.86 (0.49) |
 | 128 | 1.60 (0.41) | 1.63 (0.42) | 1.76 (0.86) | 1.31 (0.38) | 1.20 (0.49) | 1.60 (0.52) | 2.15 (0.53) |
 
-At 2 to 4 words, multiplication is 2.7 to 3.3 times GMP with assembly. That is about the same as generic GMP, so it is per-operation overhead (allocation, dispatch), not the multiply loop. From 8 words up the gap to GMP with assembly is about 1.5 to 2 times, which is the assembly.
+At 2 to 4 words, multiplication is 2.7 to 3.3 times GMP with assembly, about the same as generic GMP. That suggests per-operation overhead rather than the multiply loop, but these runs do not isolate allocation, dispatch, code generation or thresholds. From 8 words up the gap to GMP with assembly is about 1.5 to 2 times, consistent with GMP's assembly loops.
+
+The timing scopes differ: dashu allocates each result, while GMP writes into a reused variable, and GMP's `addmul` is one fused call where dashu does a multiply and an add. The two sides also draw different random inputs of the same sizes. So the ratios compare the two implementations as used, not their inner loops alone.
 
 ## Part B: Sagebrush's multimodular kernels
 
-Sagebrush's own code (`MultiCrt`, `zmat::ratrecon` at `4d4225f9`) against the same algorithms as plain GMP loops. The inputs are 1,000 integers filling half the product of $k$ primes just below $2^{62}$. Ratios are Sagebrush ÷ GMP with assembly; in parentheses, ÷ generic C. Files: `results/vm4/B-*.txt`.
+Sagebrush's own code (`MultiCrt`, `zmat::ratrecon` at `4d4225f9`) against plain GMP loops: the same method for CRT reconstruction, a different one for residues (below), a multiply-plus-add against GMP's fused `addmul` for the dot product, and the same half extended Euclidean algorithm on separately generated fractions for rational reconstruction. The inputs are 1,000 integers filling half the product of $k$ primes just below $2^{62}$. Ratios are Sagebrush ÷ GMP with assembly; in parentheses, ÷ generic C. Files: `results/vm4/B-*.txt`.
 
 | $k$ (words) | residues | residues, precomputed powers | CRT | dot product | rational reconstruction |
 |---|---|---|---|---|---|
@@ -110,21 +112,21 @@ The GMP side's residues are one `mpz_fdiv_ui` per prime. That is a simpler metho
 
 ## Part C: the Python-to-engine boundary
 
-Each big integer crosses as a decimal string in JSON: V8 prints it, dashu parses it, and the reply goes back the same way. Files: `results/vm4/C-*.txt`.
+Each big integer crosses as a decimal string in JSON: V8 prints it, dashu parses it, and the reply goes back the same way. The table sums four conversions timed in isolation (V8 to and from a string, dashu to and from a string); it does not include the engine call, JSON serialization of the request, or transport. Files: `results/vm4/C-*.txt`.
 
-| words | decimal round trip (V8 to and from, dashu to and from) | hex round trip |
-|---:|---:|---:|
-| 16 | about 5.7 µs | about 1.6 µs |
-| 1,024 | about 2.5 ms | about 0.11 ms |
-| 5,191 (about $10^5$ digits) | about 28 ms | about 0.73 ms |
+| words | decimal conversions, summed | hex conversions, summed | ratio |
+|---:|---:|---:|---:|
+| 16 | 5.9 µs | 1.8 µs | 3.3 |
+| 1,024 | 2.5 ms | 0.13 ms | 19.8 |
+| 5,191 (about $10^5$ digits) | 28 ms | 0.74 ms | 37.2 |
 
 ## What this says about the plan's order (native first)
 
-1. **Batched multimodular kernels and small-integer overhead (W3, W2) come first.** F4's profile is dominated by them: residues by one word, CRT lifting, building integers from buffers, and allocation.
+1. **Batched multimodular kernels and small-integer overhead (W3, W2) come first** (a provisional reading of the hot functions): F4's profile is dominated by residues by one word, CRT lifting, building integers from buffers, and allocation.
 2. **gcd at small and medium sizes, and rational reconstruction (W6).** gcd is 6 to 12% of F4, and rational reconstruction is the weakest kernel against GMP.
 3. **Move ECM's Montgomery arithmetic into the shared crate** as a reusable modular context (W4b), then measure it against GMP's modular powers (dashu's own powmod is 1.7 to 3.2 times GMP with assembly).
 4. **Hex at the boundary (W7a)** is cheap and low risk.
-5. **The large-size items (W1, W4a, W5) can wait.** No profiled workload spent time at $10^4$ digits or more.
+5. **The large-size items (W1, W4a, W5) can wait, provisionally.** Their relevance is not settled until the operand sizes and the mpmath core's profile are measured.
 
 ## Still to measure
 
