@@ -1,0 +1,2 @@
+[ perf record: Woken up 10 times to write data ]
+[ perf record: Captured and wrote 2.418 MB out/D-mpmath-300k.perf.data ]
