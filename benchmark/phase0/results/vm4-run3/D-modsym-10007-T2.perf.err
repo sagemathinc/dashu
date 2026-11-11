@@ -1,0 +1,3 @@
+perf child start 08:42:33.106822254
+[ perf record: Woken up 4 times to write data ]
+[ perf record: Captured and wrote 1.064 MB out/D-modsym-10007-T2.perf.data (16884 samples) ]

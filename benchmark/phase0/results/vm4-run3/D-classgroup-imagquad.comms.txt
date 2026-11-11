@@ -1,0 +1,4 @@
+    85.66%  python3  4156854:python3
+    14.22%  swapper        0:swapper
+     0.06%  bash     4156867:date   
+     0.06%  date     4156867:date   

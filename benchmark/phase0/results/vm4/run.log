@@ -1,0 +1,96 @@
+START 2026-11-11T07:35:10Z pgid=4146729 host=cocalc-d7c19ab4ccbe6bf7e-p-vm-60c64fe5c74646bab9c52341
+=== build-A 2026-11-11T07:35:10Z
+   Compiling phase0-kernels v0.1.0 (/home/user/sage2-p0/dashu/benchmark/phase0/kernels)
+    Finished `release` profile [optimized] target(s) in 10.03s
+rc=0
+=== build-B 2026-11-11T07:35:20Z
+   Compiling phase0-batched v0.1.0 (/home/user/sage2-p0/dashu/benchmark/phase0/batched)
+    Finished `release` profile [optimized] target(s) in 11.40s
+rc=0
+=== build-C 2026-11-11T07:35:31Z
+   Compiling phase0-radix v0.1.0 (/home/user/sage2-p0/dashu/benchmark/phase0/boundary/dashu-radix)
+    Finished `release` profile [optimized] target(s) in 4.21s
+rc=0
+=== build-py 2026-11-11T07:35:36Z
+warning: `sagebrush-py` (lib) generated 6 warnings
+    Finished `release` profile [optimized + debuginfo] target(s) in 2m 25s
+rc=0
+=== timings 2026-11-11T07:38:01Z
+A dashu rc=0
+A gmp-asm rc=0
+A gmp-gen rc=0
+B sagebrush rc=0
+B gmp-asm rc=0
+B gmp-gen rc=0
+C dashu rc=0
+C v8 rc=0
+=== profiles 2026-11-11T07:39:51Z
+classgroup-imagquad plain rc=0 classgroup-imagquad wall 1.45 s maxrss 45920 KB
+classgroup-imagquad perf rc=0 workload rc=0
+classgroup-imagquad report rc=0 lines=22
+classgroup-imagquad perf.data removed: ls: cannot access 'out/D-classgroup-imagquad.perf.data*': No such file or directory
+classgroup-quintic plain rc=0 classgroup-quintic wall 6.91 s maxrss 52160 KB
+classgroup-quintic perf rc=0 workload rc=0
+classgroup-quintic report rc=0 lines=178
+classgroup-quintic perf.data removed: ls: cannot access 'out/D-classgroup-quintic.perf.data*': No such file or directory
+f4-cyclic7-QQ plain rc=0 f4-cyclic7-QQ wall 8.44 s maxrss 152492 KB
+f4-cyclic7-QQ perf rc=0 workload rc=0
+f4-cyclic7-QQ report rc=0 lines=192
+f4-cyclic7-QQ perf.data removed: ls: cannot access 'out/D-f4-cyclic7-QQ.perf.data*': No such file or directory
+f4-katsura8-QQ plain rc=0 f4-katsura8-QQ wall 12.17 s maxrss 212620 KB
+f4-katsura8-QQ perf rc=0 workload rc=0
+f4-katsura8-QQ report rc=0 lines=221
+f4-katsura8-QQ perf.data removed: ls: cannot access 'out/D-f4-katsura8-QQ.perf.data*': No such file or directory
+factor-ecm plain rc=0 factor-ecm wall 14.93 s maxrss 35356 KB
+factor-ecm perf rc=0 workload rc=0
+factor-ecm report rc=0 lines=35
+factor-ecm perf.data removed: ls: cannot access 'out/D-factor-ecm.perf.data*': No such file or directory
+modsym-10007-T2 plain rc=0 modsym-10007-T2 wall 16.42 s maxrss 41072 KB
+modsym-10007-T2 perf rc=0 workload rc=0
+modsym-10007-T2 report rc=0 lines=17
+modsym-10007-T2 perf.data removed: ls: cannot access 'out/D-modsym-10007-T2.perf.data*': No such file or directory
+mpmath-300k plain rc=0 mpmath-300k wall 64.40 s maxrss 48856 KB
+mpmath-300k perf rc=0 workload rc=0
+mpmath-300k report rc=0 lines=405
+mpmath-300k perf.data removed: ls: cannot access 'out/D-mpmath-300k.perf.data*': No such file or directory
+total 220
+drwxrwxr-x  2 user user  4096 Nov 11 07:44 .
+drwxr-xr-x 10 user user  4096 Nov 11 07:38 ..
+-rw-rw-r--  1 user user   939 Nov 11 07:38 A-native-dashu.txt
+-rw-rw-r--  1 user user  1051 Nov 11 07:38 A-native-gmp-asm.txt
+-rw-rw-r--  1 user user  1051 Nov 11 07:38 A-native-gmp-generic.txt
+-rw-rw-r--  1 user user   294 Nov 11 07:38 B-native-gmp-asm.txt
+-rw-rw-r--  1 user user   294 Nov 11 07:39 B-native-gmp-generic.txt
+-rw-rw-r--  1 user user   354 Nov 11 07:38 B-native-sagebrush.txt
+-rw-rw-r--  1 user user   572 Nov 11 07:39 C-native-dashu-radix.txt
+-rw-rw-r--  1 user user   757 Nov 11 07:39 C-node-v8-bigint.txt
+-rw-rw-r--  1 user user   129 Nov 11 07:39 D-classgroup-imagquad.perf.err
+-rw-rw-r--  1 user user  1284 Nov 11 07:39 D-classgroup-imagquad.report.txt
+-rw-rw-r--  1 user user    19 Nov 11 07:39 D-classgroup-imagquad.stdout
+-rw-rw-r--  1 user user    48 Nov 11 07:39 D-classgroup-imagquad.time
+-rw-rw-r--  1 user user   128 Nov 11 07:40 D-classgroup-quintic.perf.err
+-rw-rw-r--  1 user user 14800 Nov 11 07:40 D-classgroup-quintic.report.txt
+-rw-rw-r--  1 user user     2 Nov 11 07:40 D-classgroup-quintic.stdout
+-rw-rw-r--  1 user user    47 Nov 11 07:40 D-classgroup-quintic.time
+-rw-rw-r--  1 user user   123 Nov 11 07:40 D-f4-cyclic7-QQ.perf.err
+-rw-rw-r--  1 user user 16803 Nov 11 07:40 D-f4-cyclic7-QQ.report.txt
+-rw-rw-r--  1 user user     4 Nov 11 07:40 D-f4-cyclic7-QQ.stdout
+-rw-rw-r--  1 user user    43 Nov 11 07:40 D-f4-cyclic7-QQ.time
+-rw-rw-r--  1 user user   124 Nov 11 07:40 D-f4-katsura8-QQ.perf.err
+-rw-rw-r--  1 user user 17388 Nov 11 07:40 D-f4-katsura8-QQ.report.txt
+-rw-rw-r--  1 user user     4 Nov 11 07:40 D-f4-katsura8-QQ.stdout
+-rw-rw-r--  1 user user    45 Nov 11 07:40 D-f4-katsura8-QQ.time
+-rw-rw-r--  1 user user   120 Nov 11 07:41 D-factor-ecm.perf.err
+-rw-rw-r--  1 user user  2153 Nov 11 07:41 D-factor-ecm.report.txt
+-rw-rw-r--  1 user user     2 Nov 11 07:41 D-factor-ecm.stdout
+-rw-rw-r--  1 user user    40 Nov 11 07:41 D-factor-ecm.time
+-rw-rw-r--  1 user user   125 Nov 11 07:41 D-modsym-10007-T2.perf.err
+-rw-rw-r--  1 user user   890 Nov 11 07:41 D-modsym-10007-T2.report.txt
+-rw-rw-r--  1 user user     4 Nov 11 07:41 D-modsym-10007-T2.stdout
+-rw-rw-r--  1 user user    45 Nov 11 07:41 D-modsym-10007-T2.time
+-rw-rw-r--  1 user user   122 Nov 11 07:44 D-mpmath-300k.perf.err
+-rw-rw-r--  1 user user 21841 Nov 11 07:44 D-mpmath-300k.report.txt
+-rw-rw-r--  1 user user     4 Nov 11 07:42 D-mpmath-300k.stdout
+-rw-rw-r--  1 user user    41 Nov 11 07:42 D-mpmath-300k.time
+-rw-rw-r--  1 user user   759 Nov 11 07:38 SHA256SUMS-binaries
+ALL DONE 2026-11-11T07:44:03Z rc_build=0

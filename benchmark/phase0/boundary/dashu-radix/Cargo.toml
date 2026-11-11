@@ -1,0 +1,17 @@
+[package]
+name = "phase0-radix"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+# (its own workspace: a standalone measuring crate, not a member of dashu's)
+[workspace]
+
+[dependencies]
+dashu-int = { path = "../../../../integer" }
+dashu-base = { path = "../../../../base" }
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1

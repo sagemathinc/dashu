@@ -1,0 +1,192 @@
+     9.87%  _native.abi3.so       [.] sagebrush_arith::spelim::dense_axpy_avx2
+     7.83%  _native.abi3.so       [.] <dashu_int::repr::Repr>::from_buffer
+     7.68%  _native.abi3.so       [.] <sagebrush_mpoly::f4q::Crt>::lift
+     5.66%  _native.abi3.so       [.] dashu_int::mul_ops::repr::mul_large_dword
+     5.63%  _native.abi3.so       [.] sagebrush_bigint::dashu_impl::mul_ibig
+     5.30%  _native.abi3.so       [.] sagebrush_mpoly::run_parallel::<(usize, usize, u64), bool, sagebrush_mpoly::f4::spairs_reduce_to_zero::{closure#6}>::{closure#1}::{closure#0}
+     3.78%  libc.so.6             [.] malloc
+     3.31%  _native.abi3.so       [.] <sagebrush_bigint::dashu_impl::BigInt as num_integer::Integer>::gcd
+     3.27%  _native.abi3.so       [.] dashu_int::add::sub_in_place_with_sign
+     3.05%  _native.abi3.so       [.] <dashu_int::ibig::IBig as core::ops::arith::Sub>::sub
+     2.51%  _native.abi3.so       [.] dashu_int::add_ops::repr::add_large.1588
+     2.51%  libc.so.6             [.] _int_free
+     2.49%  _native.abi3.so       [.] <dashu_int::repr::TypedReprRef as dashu_base::ring::Gcd>::gcd
+     2.38%  _native.abi3.so       [.] dashu_int::div::rem_by_word
+     2.37%  libc.so.6             [.] cfree@GLIBC_2.2.5
+     2.04%  _native.abi3.so       [.] sagebrush_mpoly::run_parallel::<u64, core::option::Option<(alloc::vec::Vec<u32>, alloc::vec::Vec<sagebrush_arith::spelim::Row>, bool)>, sagebrush_mpoly::certify::certify_spairs::{closure#7}>::{closure#1}::{closure#0}
+     1.99%  libc.so.6             [.] __memmove_avx_unaligned_erms
+     1.89%  _native.abi3.so       [.] <dashu_int::repr::TypedReprRef as core::ops::arith::Mul>::mul
+     1.83%  _native.abi3.so       [.] dashu_int::mul::simple::add_mul_dword_same_len_in_place_bmi2
+     1.64%  _native.abi3.so       [.] dashu_int::div::div_by_word_in_place
+     1.53%  libc.so.6             [.] _int_malloc
+     1.33%  _native.abi3.so       [.] sagebrush_mpoly::run_parallel::<usize, core::result::Result<((sagebrush_bigint::dashu_impl::BigInt, alloc::vec::Vec<(u32, sagebrush_bigint::dashu_impl::BigInt)>), usize), usize>, sagebrush_mpoly::f4q::reconstruct_rows_opt::{closure#4}>::{closure#1}::{closure#0}
+     1.29%  _native.abi3.so       [.] dashu_int::mul::simple::add_signed_mul_chunk
+     1.28%  _native.abi3.so       [.] <dashu_int::repr::TypedRepr as core::ops::arith::Add>::add.1589
+     1.28%  _native.abi3.so       [.] <dashu_int::repr::TypedRepr as dashu_int::add_ops::SubSigned<dashu_int::repr::TypedRepr>>::sub_signed
+     1.12%  _native.abi3.so       [.] <&dashu_int::ibig::IBig as core::ops::arith::Div>::div
+     1.05%  _native.abi3.so       [.] dashu_int::div::simple::div_rem_highest_word
+     0.85%  _native.abi3.so       [.] dashu_int::add_ops::repr_signed::sub_large
+     0.81%  _native.abi3.so       [.] __umodti3
+     0.77%  _native.abi3.so       [.] core::slice::sort::unstable::quicksort::quicksort::<u32, <u32 as core::cmp::PartialOrd>::lt>
+     0.76%  _native.abi3.so       [.] sagebrush_mpoly::f4::verify_q
+     0.75%  _native.abi3.so       [.] __udivti3
+     0.61%  _native.abi3.so       [.] dashu_int::mul_ops::repr::mul_large
+     0.55%  python3.12            [.] malloc@plt
+     0.41%  _native.abi3.so       [.] <hashbrown::map::HashMap<u64, (), std::hash::random::RandomState>>::insert
+     0.31%  _native.abi3.so       [.] <std::hash::random::RandomState as core::hash::BuildHasher>::hash_one::<&usize>
+     0.31%  _native.abi3.so       [.] dashu_int::gcd_ops::repr::gcd_large_dword
+     0.30%  _native.abi3.so       [.] dashu_int::div_ops::repr::div_rem_in_lhs
+     0.30%  libc.so.6             [.] unlink_chunk.isra.0
+     0.29%  libc.so.6             [.] malloc_consolidate
+     0.27%  _native.abi3.so       [.] <dashu_int::repr::Repr>::clone_heap
+     0.26%  _native.abi3.so       [.] dashu_int::mul::add_signed_mul
+     0.25%  libc.so.6             [.] __memset_avx2_unaligned_erms
+     0.24%  _native.abi3.so       [.] dashu_int::div::fast_rem_by_normalized_dword
+     0.22%  [kernel.kallsyms]     [k] _raw_spin_unlock_irqrestore
+     0.22%  _native.abi3.so       [.] sagebrush_mpoly::f4q::reconstruct_rows_opt::{closure#1}
+     0.21%  _native.abi3.so       [.] dashu_int::div_ops::repr::div_rem_large_dword
+     0.20%  _native.abi3.so       [.] <sagebrush_arith::spelim::Pivots>::reduce_loaded
+     0.20%  _native.abi3.so       [.] <sagebrush_mpoly::f4::F4>::add
+     0.20%  _native.abi3.so       [.] dashu_int::div::rem_by_dword
+     0.17%  _native.abi3.so       [.] dashu_int::div::div_rem_in_place
+     0.16%  libc.so.6             [.] _int_free_merge_chunk
+     0.15%  _native.abi3.so       [.] <alloc::vec::Vec<alloc::vec::Vec<(u32, sagebrush_bigint::dashu_impl::BigInt)>> as alloc::vec::spec_from_iter_nested::SpecFromIterNested<alloc::vec::Vec<(u32, sagebrush_bigint::dashu_impl::BigInt)>, core::iter::adapters::map::Map<core::slice::iter::Iter<(usize, usize, u64)>, sagebrush_mpoly::certify::certify_spairs::{closure#6}>>>::from_iter
+     0.15%  _native.abi3.so       [.] <num_rational::Ratio<sagebrush_bigint::dashu_impl::BigInt>>::new
+     0.12%  [kernel.kallsyms]     [k] do_user_addr_fault
+     0.12%  _native.abi3.so       [.] dashu_int::div::div_by_dword_in_place
+     0.12%  _native.abi3.so       [.] sagebrush_arith::spelim::echelonize_idx
+     0.12%  libc.so.6             [.] _int_realloc
+     0.12%  python3.12            [.] free@plt
+     0.11%  _native.abi3.so       [.] <std::hash::random::DefaultHasher as core::hash::Hasher>::write.1768
+     0.10%  _native.abi3.so       [.] <sagebrush_bigint::dashu_impl::BigInt as num_integer::Integer>::lcm
+     0.10%  _native.abi3.so       [.] <sagebrush_mpoly::f4::F4>::reducer
+     0.09%  [kernel.kallsyms]     [k] __handle_mm_fault
+     0.09%  _native.abi3.so       [.] <sagebrush_mpoly::order::Packing>::key
+     0.09%  _native.abi3.so       [.] sagebrush_mpoly::certify::bound
+     0.07%  _native.abi3.so       [.] <dashu_int::ibig::IBig as core::ops::arith::Div<&dashu_int::ibig::IBig>>::div
+     0.07%  _native.abi3.so       [.] core::slice::sort::stable::quicksort::quicksort::<(u64, sagebrush_bigint::dashu_impl::BigInt), <[(u64, sagebrush_bigint::dashu_impl::BigInt)]>::sort_by<sagebrush_mpoly::sparse::from_q::{closure#1}>::{closure#0}>
+     0.07%  _native.abi3.so       [.] sagebrush_mpoly::f4::ratrecon
+     0.06%  _native.abi3.so       [.] <sagebrush_mpoly::f4q::Ctx>::good
+     0.06%  _native.abi3.so       [.] <sagebrush_mpoly::sparse::Poly<sagebrush_mpoly::sparse::QQ>>::from_terms
+     0.06%  _native.abi3.so       [.] sagebrush_arith::spelim::reduce_fl::{closure#0}
+     0.06%  libc.so.6             [.] __libc_calloc
+     0.06%  libc.so.6             [.] __mprotect
+     0.05%  [kernel.kallsyms]     [k] do_syscall_64
+     0.05%  _native.abi3.so       [.] <sagebrush_bigint::dashu_impl::BigInt as core::ops::arith::Div>::div
+     0.05%  _native.abi3.so       [.] <sagebrush_mpoly::sparse::Poly<sagebrush_mpoly::sparse::QQ>>::repack
+     0.05%  _native.abi3.so       [.] sagebrush_mpoly::f4::reduces_to_zero_z
+     0.05%  libc.so.6             [.] realloc
+     0.04%  [kernel.kallsyms]     [k] __refill_objects_node
+     0.04%  [kernel.kallsyms]     [k] commit_merge
+     0.04%  [kernel.kallsyms]     [k] kernel_init_pages
+     0.04%  [kernel.kallsyms]     [k] mas_spanning_rebalance
+     0.04%  [kernel.kallsyms]     [k] zap_present_ptes.constprop.0
+     0.04%  _native.abi3.so       [.] <alloc::collections::btree::map::BTreeMap<u128, (u64, num_rational::Ratio<sagebrush_bigint::dashu_impl::BigInt>)>>::insert
+     0.04%  _native.abi3.so       [.] <alloc::raw_vec::RawVec<u32>>::grow_one
+     0.04%  _native.abi3.so       [.] <alloc::vec::Vec<(u32, sagebrush_bigint::dashu_impl::BigInt)> as core::clone::Clone>::clone
+     0.04%  _native.abi3.so       [.] <core::iter::adapters::flatten::FlatMap<core::slice::iter::Iter<(usize, usize, u64)>, core::iter::adapters::chain::Chain<core::iter::adapters::map::Map<core::slice::iter::Iter<(u128, u64, sagebrush_bigint::dashu_impl::BigInt)>, sagebrush_mpoly::f4::spairs_reduce_to_zero::{closure#3}::{closure#0}>, core::iter::adapters::map::Map<core::slice::iter::Iter<(u128, u64, sagebrush_bigint::dashu_impl::BigInt)>, sagebrush_mpoly::f4::spairs_reduce_to_zero::{closure#3}::{closure#1}>>, sagebrush_mpoly::f4::spairs_reduce_to_zero::{closure#3}> as core::iter::traits::iterator::Iterator>::next
+     0.04%  _native.abi3.so       [.] core::ptr::drop_glue::<alloc::vec::Vec<(u32, sagebrush_bigint::dashu_impl::BigInt)>>
+     0.04%  _native.abi3.so       [.] core::ptr::drop_glue::<alloc::vec::Vec<sagebrush_bigint::dashu_impl::BigInt>>
+     0.04%  _native.abi3.so       [.] dashu_int::div::memory_requirement_exact
+     0.04%  _native.abi3.so       [.] sagebrush_mpoly::certify::bound::{closure#3}
+     0.04%  _native.abi3.so       [.] sagebrush_mpoly::sparse::to_q
+     0.04%  python3.12            [.] 0x000000000021d9e8
+     0.02%  [kernel.kallsyms]     [k] __kfree_rcu_sheaf
+     0.02%  [kernel.kallsyms]     [k] __pi_memset
+     0.02%  [kernel.kallsyms]     [k] __rmqueue_pcplist
+     0.02%  [kernel.kallsyms]     [k] _raw_spin_lock
+     0.02%  [kernel.kallsyms]     [k] free_unref_folios
+     0.02%  [kernel.kallsyms]     [k] handle_mm_fault
+     0.02%  [kernel.kallsyms]     [k] mas_topiary_replace
+     0.02%  [kernel.kallsyms]     [k] mas_walk
+     0.02%  [kernel.kallsyms]     [k] perf_event_mmap_event
+     0.02%  [kernel.kallsyms]     [k] perf_iterate_ctx
+     0.02%  [kernel.kallsyms]     [k] vma_complete
+     0.02%  [kernel.kallsyms]     [k] x64_sys_call
+     0.02%  _native.abi3.so       [.] <&dashu_int::ibig::IBig as core::ops::arith::Sub<dashu_int::ibig::IBig>>::sub.1787
+     0.02%  _native.abi3.so       [.] <alloc::raw_vec::RawVecInner>::finish_grow
+     0.02%  _native.abi3.so       [.] <core::iter::adapters::map::Map<core::iter::adapters::filter::Filter<core::iter::adapters::rev::Rev<alloc::collections::btree::map::IntoIter<u128, (u64, num_rational::Ratio<sagebrush_bigint::dashu_impl::BigInt>)>>, <sagebrush_mpoly::sparse::Poly<sagebrush_mpoly::sparse::QQ>>::from_terms::{closure#0}>, <sagebrush_mpoly::sparse::Poly<sagebrush_mpoly::sparse::QQ>>::from_terms::{closure#1}> as core::iter::traits::iterator::Iterator>::next
+     0.02%  _native.abi3.so       [.] <dashu_int::buffer::Buffer>::reallocate_raw
+     0.02%  _native.abi3.so       [.] <dashu_int::ibig::IBig as core::ops::arith::Sub<&dashu_int::ibig::IBig>>::sub
+     0.02%  _native.abi3.so       [.] <dashu_int::repr::TypedReprRef as dashu_int::add_ops::SubSigned<dashu_int::repr::TypedReprRef>>::sub_signed
+     0.02%  _native.abi3.so       [.] <sagebrush_bigint::dashu_impl::BigInt as <[_]>::to_vec_in::ConvertVec>::to_vec::<alloc::alloc::Global>
+     0.02%  _native.abi3.so       [.] <sagebrush_mpoly::f4::F4>::preprocess
+     0.02%  _native.abi3.so       [.] core::ptr::drop_glue::<alloc::vec::Vec<sagebrush_ball::ball::Ball>>
+     0.02%  _native.abi3.so       [.] core::slice::sort::shared::pivot::median3_rec::<u32, <u32 as core::cmp::PartialOrd>::lt>
+     0.02%  _native.abi3.so       [.] dashu_int::add_ops::repr::add_large_dword.1587
+     0.02%  _native.abi3.so       [.] sagebrush_arith::spelim::back_reduce
+     0.02%  _native.abi3.so       [.] sagebrush_mpoly::f4q::dehomogenize
+     0.02%  libc.so.6             [.] _int_free_maybe_consolidate
+     0.02%  python3.12            [.] _PyDict_MaybeUntrack
+     0.02%  python3.12            [.] _PyEval_EvalFrameDefault
+     0.02%  python3.12            [.] 0x000000000021cb5d
+     0.01%  [kernel.kallsyms]     [k] __alloc_frozen_pages_noprof
+     0.01%  [kernel.kallsyms]     [k] __vma_start_exclude_readers
+     0.01%  [kernel.kallsyms]     [k] alloc_anon_folio
+     0.01%  [kernel.kallsyms]     [k] alloc_pages_mpol
+     0.01%  [kernel.kallsyms]     [k] build_id_parse_nofault
+     0.01%  [kernel.kallsyms]     [k] cap_vm_enough_memory
+     0.01%  [kernel.kallsyms]     [k] change_protection
+     0.01%  [kernel.kallsyms]     [k] change_pte_range
+     0.01%  [kernel.kallsyms]     [k] change_pud_range.isra.0
+     0.01%  [kernel.kallsyms]     [k] count_memcg_events
+     0.01%  [kernel.kallsyms]     [k] do_anonymous_page
+     0.01%  [kernel.kallsyms]     [k] do_mprotect_pkey
+     0.01%  [kernel.kallsyms]     [k] folio_add_new_anon_rmap
+     0.01%  [kernel.kallsyms]     [k] kernfs_refresh_inode
+     0.01%  [kernel.kallsyms]     [k] lock_vma_under_rcu
+     0.01%  [kernel.kallsyms]     [k] lruvec_stat_mod_folio
+     0.01%  [kernel.kallsyms]     [k] mas_mab_cp
+     0.01%  [kernel.kallsyms]     [k] mas_preallocate
+     0.01%  [kernel.kallsyms]     [k] mas_prev
+     0.01%  [kernel.kallsyms]     [k] mas_prev_node
+     0.01%  [kernel.kallsyms]     [k] mas_wr_spanning_store
+     0.01%  [kernel.kallsyms]     [k] mprotect_fixup
+     0.01%  [kernel.kallsyms]     [k] perf_event_mmap
+     0.01%  [kernel.kallsyms]     [k] pte_offset_map_rw_nolock
+     0.01%  [kernel.kallsyms]     [k] slab_update_freelist.isra.0
+     0.01%  [kernel.kallsyms]     [k] strnlen
+     0.01%  [kernel.kallsyms]     [k] uncharge_folio
+     0.01%  [kernel.kallsyms]     [k] update_sd_lb_stats.constprop.0
+     0.01%  [kernel.kallsyms]     [k] vma_adjust_trans_huge
+     0.01%  [kernel.kallsyms]     [k] vma_alloc_folio_noprof
+     0.01%  [kernel.kallsyms]     [k] vma_merge_existing_range
+     0.01%  [kernel.kallsyms]     [k] vma_prepare
+     0.01%  _native.abi3.so       [.] <alloc::collections::btree::node::Handle<alloc::collections::btree::node::NodeRef<alloc::collections::btree::node::marker::Mut, u128, (u64, sagebrush_bigint::dashu_impl::BigInt), alloc::collections::btree::node::marker::Leaf>, alloc::collections::btree::node::marker::KV>>::remove_leaf_kv::<<alloc::collections::btree::map::entry::OccupiedEntry<u128, (u64, sagebrush_bigint::dashu_impl::BigInt)>>::remove_kv::{closure#0}, alloc::alloc::Global>
+     0.01%  _native.abi3.so       [.] <alloc::raw_vec::RawVecInner>::finish_grow
+     0.01%  _native.abi3.so       [.] <core::iter::adapters::map::Map<std::collections::hash::map::Values<u64, (u64, usize)>, sagebrush_mpoly::f4q::run::{closure#7}::{closure#1}> as core::iter::traits::iterator::Iterator>::next
+     0.01%  _native.abi3.so       [.] <dashu_int::ibig::IBig as core::ops::arith::Add>::add
+     0.01%  _native.abi3.so       [.] <dashu_int::repr::TypedReprRef as core::ops::arith::Add<dashu_int::repr::TypedRepr>>::add
+     0.01%  _native.abi3.so       [.] <dashu_int::ubig::UBig>::to_le_bytes
+     0.01%  _native.abi3.so       [.] <hashbrown::map::HashMap<u64, u32, std::hash::random::RandomState>>::insert
+     0.01%  _native.abi3.so       [.] <sagebrush_bigint::dashu_impl::BigInt>::to_u64_digits
+     0.01%  _native.abi3.so       [.] <sagebrush_mpoly::Coeffs>::shrink
+     0.01%  _native.abi3.so       [.] <sagebrush_mpoly::ZPoly>::from_terms
+     0.01%  _native.abi3.so       [.] <sagebrush_mpoly::f4q::Ctx>::element
+     0.01%  _native.abi3.so       [.] <sagebrush_mpoly::f4q::Ctx>::solve
+     0.01%  _native.abi3.so       [.] __modti3
+     0.01%  _native.abi3.so       [.] core::ptr::drop_glue::<alloc::vec::Vec<sagebrush_mpoly::sparse::Term<num_rational::Ratio<sagebrush_bigint::dashu_impl::BigInt>>>>
+     0.01%  _native.abi3.so       [.] core::slice::sort::unstable::ipnsort::<u32, <u32 as core::cmp::PartialOrd>::lt>
+     0.01%  _native.abi3.so       [.] core::slice::sort::unstable::quicksort::quicksort::<(u128, u64, sagebrush_bigint::dashu_impl::BigInt), <[(u128, u64, sagebrush_bigint::dashu_impl::BigInt)]>::sort_unstable_by<sagebrush_mpoly::f4q::run::{closure#3}>::{closure#0}>
+     0.01%  _native.abi3.so       [.] dashu_int::div_ops::repr::div_large
+     0.01%  _native.abi3.so       [.] dashu_int::root_ops::repr::sqrt_rem_large
+     0.01%  _native.abi3.so       [.] sagebrush_mpoly::f4::to_zt
+     0.01%  _native.abi3.so       [.] sagebrush_mpoly::f4q::run::{closure#7}
+     0.01%  _native.abi3.so       [.] sagebrush_mpoly::sparse::from_q
+     0.01%  ld-linux-x86-64.so.2  [.] __tls_get_addr
+     0.01%  libc.so.6             [.] __memcmp_avx2_movbe
+     0.01%  libc.so.6             [.] syscall
+     0.01%  python3.12            [.] PyObject_Free
+     0.01%  python3.12            [.] 0x000000000014e722
+     0.01%  python3.12            [.] 0x0000000000159fa6
+     0.01%  python3.12            [.] 0x000000000015a083
+     0.01%  python3.12            [.] 0x000000000015b7a2
+     0.01%  python3.12            [.] 0x000000000017a3c2
+     0.01%  python3.12            [.] 0x0000000000191456
+     0.01%  python3.12            [.] 0x0000000000191842
+     0.01%  python3.12            [.] 0x000000000021cb61
+     0.01%  python3.12            [.] 0x000000000021d0dd
+     0.01%  python3.12            [.] 0x000000000021d293
+     0.01%  python3.12            [.] 0x000000000021d395
+     0.01%  python3.12            [.] 0x000000000021d988
+     0.01%  python3.12            [.] 0x000000000021d98f
