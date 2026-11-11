@@ -21,12 +21,12 @@ Phase 0 of Sagebrush's big-integer plan (`design/bigint-plan.md`, item W0). It i
   No profiled workload spent visible time in numbers of $10^4$ digits or more.
 - **ECM has its own integer arithmetic.** Factoring spends 99% of its time in `sagebrush_classgroup::nf::ecm::Mont`, a fixed-size Montgomery multiplication written inside the class-group crate. It is integer arithmetic outside the shared crate. The shared-crate rule says it belongs in `sagebrush-bigint`, as the reusable-inverse context of plan item W4b.
 - **Next to GMP, at the sizes that matter** (1 to 128 words):
-  - dashu is 1.2 to 3.5 times slower than GMP with assembly on multiplication, multiply-and-add and modular powers at every size, and on division from 4 words up (at 1 to 2 words it is faster);
+  - dashu is 1.2 to 3.5 times slower than GMP with assembly on multiplication, multiply-and-add and modular powers at every size, and on division from 4 words up (2n/n division also at 2 words). It is faster only on division at the smallest sizes: by one word at 1 to 2 words, and 2n/n at 1 word;
   - it is about even on gcd;
   - from 8 words up it is faster than GMP without assembly, or about even, on every operation.
   
   Sagebrush's multimodular kernels:
-  - residues are at GMP-with-assembly speed;
+  - residues with precomputed powers are at GMP-with-assembly speed (0.90 to 1.10); without them they are 1.1 to 3.3 times slower, though the GMP side uses a simpler method (see Part B);
   - CRT reconstruction is 1.6 to 2.6 times slower;
   - dot products are 1.4 to 3.2 times slower;
   - rational reconstruction is 2.4 to 3.6 times slower, and slower even than GMP without assembly.
@@ -129,6 +129,7 @@ Each big integer crosses as a decimal string in JSON: V8 prints it, dashu parses
 ## Still to measure
 
 - modular symbols' profile, with perf started at launch;
+- the imaginary quadratic class group's full profile;
 - the size histogram of operands in F4 and the class group;
 - the mpmath core at high precision, in its own harness;
 - the same kernels in wasm, against gmpy2 in Pyodide.
