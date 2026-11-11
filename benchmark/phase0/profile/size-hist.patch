@@ -1,0 +1,255 @@
+diff --git a/engine/bigint/src/dashu_impl.rs b/engine/bigint/src/dashu_impl.rs
+index ff446ee71..a5fca3013 100644
+--- a/engine/bigint/src/dashu_impl.rs
++++ b/engine/bigint/src/dashu_impl.rs
+@@ -144,6 +144,7 @@ pub fn mul_ubig(a: &UBig, b: &UBig) -> UBig {
+ 
+ /// a * b for signed integers (see [`mul_ubig`]).
+ pub fn mul_ibig(a: &IBig, b: &IBig) -> IBig {
++    crate::sizehist::rec("Mul", crate::sizehist::words(a), crate::sizehist::words(b));
+     #[cfg(target_pointer_width = "64")]
+     {
+         let (sa, wa) = a.as_sign_words();
+@@ -267,6 +268,7 @@ macro_rules! binop {
+             type Output = BigInt;
+             #[inline]
+             fn $m(self, r: BigInt) -> BigInt {
++                crate::sizehist::rec(stringify!($tr), crate::sizehist::words(&self.0), crate::sizehist::words(&r.0));
+                 BigInt(self.0 $op r.0)
+             }
+         }
+@@ -274,6 +276,7 @@ macro_rules! binop {
+             type Output = BigInt;
+             #[inline]
+             fn $m(self, r: &BigInt) -> BigInt {
++                crate::sizehist::rec(stringify!($tr), crate::sizehist::words(&self.0), crate::sizehist::words(&r.0));
+                 BigInt(self.0 $op &r.0)
+             }
+         }
+@@ -281,6 +284,7 @@ macro_rules! binop {
+             type Output = BigInt;
+             #[inline]
+             fn $m(self, r: BigInt) -> BigInt {
++                crate::sizehist::rec(stringify!($tr), crate::sizehist::words(&self.0), crate::sizehist::words(&r.0));
+                 BigInt(&self.0 $op r.0)
+             }
+         }
+@@ -288,12 +292,14 @@ macro_rules! binop {
+             type Output = BigInt;
+             #[inline]
+             fn $m(self, r: &BigInt) -> BigInt {
++                crate::sizehist::rec(stringify!($tr), crate::sizehist::words(&self.0), crate::sizehist::words(&r.0));
+                 BigInt(&self.0 $op &r.0)
+             }
+         }
+         impl $atr<BigInt> for BigInt {
+             #[inline]
+             fn $am(&mut self, r: BigInt) {
++                crate::sizehist::rec(stringify!($tr), crate::sizehist::words(&self.0), crate::sizehist::words(&r.0));
+                 let a = std::mem::take(&mut self.0);
+                 self.0 = a $op r.0;
+             }
+@@ -301,6 +307,7 @@ macro_rules! binop {
+         impl $atr<&BigInt> for BigInt {
+             #[inline]
+             fn $am(&mut self, r: &BigInt) {
++                crate::sizehist::rec(stringify!($tr), crate::sizehist::words(&self.0), crate::sizehist::words(&r.0));
+                 let a = std::mem::take(&mut self.0);
+                 self.0 = a $op &r.0;
+             }
+@@ -314,6 +321,7 @@ macro_rules! binop_prims {
+             type Output = BigInt;
+             #[inline]
+             fn $m(self, r: $p) -> BigInt {
++                crate::sizehist::rec(concat!(stringify!($tr), "_prim"), crate::sizehist::words(&self.0), 1);
+                 BigInt(self.0 $op IBig::from(r))
+             }
+         }
+@@ -321,6 +329,7 @@ macro_rules! binop_prims {
+             type Output = BigInt;
+             #[inline]
+             fn $m(self, r: $p) -> BigInt {
++                crate::sizehist::rec(concat!(stringify!($tr), "_prim"), crate::sizehist::words(&self.0), 1);
+                 BigInt(&self.0 $op IBig::from(r))
+             }
+         }
+@@ -328,6 +337,7 @@ macro_rules! binop_prims {
+             type Output = BigInt;
+             #[inline]
+             fn $m(self, r: BigInt) -> BigInt {
++                crate::sizehist::rec(concat!(stringify!($tr), "_prim"), 1, crate::sizehist::words(&r.0));
+                 BigInt(IBig::from(self) $op r.0)
+             }
+         }
+@@ -335,12 +345,14 @@ macro_rules! binop_prims {
+             type Output = BigInt;
+             #[inline]
+             fn $m(self, r: &BigInt) -> BigInt {
++                crate::sizehist::rec(concat!(stringify!($tr), "_prim"), 1, crate::sizehist::words(&r.0));
+                 BigInt(IBig::from(self) $op &r.0)
+             }
+         }
+         impl $atr<$p> for BigInt {
+             #[inline]
+             fn $am(&mut self, r: $p) {
++                crate::sizehist::rec(concat!(stringify!($tr), "_prim"), crate::sizehist::words(&self.0), 1);
+                 let a = std::mem::take(&mut self.0);
+                 self.0 = a $op IBig::from(r);
+             }
+@@ -454,6 +466,7 @@ macro_rules! ubinop {
+         impl $atr<BigUint> for BigUint {
+             #[inline]
+             fn $am(&mut self, r: BigUint) {
++                crate::sizehist::rec(stringify!($tr), crate::sizehist::words(&self.0), crate::sizehist::words(&r.0));
+                 let a = std::mem::take(&mut self.0);
+                 self.0 = a $op r.0;
+             }
+@@ -461,6 +474,7 @@ macro_rules! ubinop {
+         impl $atr<&BigUint> for BigUint {
+             #[inline]
+             fn $am(&mut self, r: &BigUint) {
++                crate::sizehist::rec(stringify!($tr), crate::sizehist::words(&self.0), crate::sizehist::words(&r.0));
+                 let a = std::mem::take(&mut self.0);
+                 self.0 = a $op &r.0;
+             }
+@@ -710,6 +724,7 @@ impl num_integer::Integer for BigInt {
+         self.div_mod_floor(d).1
+     }
+     fn div_mod_floor(&self, d: &Self) -> (Self, Self) {
++        crate::sizehist::rec("div_rem", crate::sizehist::words(&self.0), crate::sizehist::words(&d.0));
+         let (q, r) = (&self.0).div_rem(&d.0);
+         if !r.is_zero() && ((r < IBig::ZERO) != (d.0 < IBig::ZERO)) {
+             (BigInt(q - IBig::ONE), BigInt(r + &d.0))
+@@ -718,10 +733,12 @@ impl num_integer::Integer for BigInt {
+         }
+     }
+     fn div_rem(&self, d: &Self) -> (Self, Self) {
++        crate::sizehist::rec("div_rem", crate::sizehist::words(&self.0), crate::sizehist::words(&d.0));
+         let (q, r) = (&self.0).div_rem(&d.0);
+         (BigInt(q), BigInt(r))
+     }
+     fn gcd(&self, other: &Self) -> Self {
++        crate::sizehist::rec("gcd", crate::sizehist::words(&self.0), crate::sizehist::words(&other.0));
+         // dashu panics for gcd(0, 0); num-bigint's is 0
+         if self.0.is_zero() && other.0.is_zero() {
+             return BigInt(IBig::ZERO);
+@@ -931,6 +948,7 @@ impl BigInt {
+         (self.sign(), BigUint((&self.0).unsigned_abs()))
+     }
+     pub fn to_u64_digits(&self) -> (Sign, Vec<u64>) {
++        crate::sizehist::rec("conv", crate::sizehist::words(&self.0), 0);
+         let mut d = le_bytes_to_u64(&(&self.0).unsigned_abs().to_le_bytes());
+         while d.last() == Some(&0) {
+             d.pop();
+@@ -1017,6 +1035,7 @@ impl BigInt {
+         IBig::from_str_radix(s.strip_prefix('+').unwrap_or(s), radix).ok().map(BigInt)
+     }
+     pub fn from_bytes_le(sign: Sign, bytes: &[u8]) -> BigInt {
++        crate::sizehist::rec("conv", (bytes.len() + 7) / 8, 0);
+         BigInt::from_biguint(sign, BigUint(UBig::from_le_bytes(bytes)))
+     }
+     pub fn to_bytes_le(&self) -> (Sign, Vec<u8>) {
+diff --git a/engine/bigint/src/lib.rs b/engine/bigint/src/lib.rs
+index 22570c1f4..bd81e8839 100644
+--- a/engine/bigint/src/lib.rs
++++ b/engine/bigint/src/lib.rs
+@@ -28,6 +28,8 @@ pub(crate) mod ntt32;
+ #[cfg(not(feature = "num-backend"))]
+ mod dashu_impl;
+ #[cfg(not(feature = "num-backend"))]
++pub mod sizehist;
++#[cfg(not(feature = "num-backend"))]
+ pub mod hgcd;
+ 
+ /// Long loops in this crate check for Ctrl-C (engine/interrupt).
+diff --git a/engine/bigint/src/sizehist.rs b/engine/bigint/src/sizehist.rs
+new file mode 100644
+index 000000000..a1352ea88
+--- /dev/null
++++ b/engine/bigint/src/sizehist.rs
+@@ -0,0 +1,85 @@
++//! Phase 0 only (a local, uncommitted measuring patch): counts of the facade's operations by operand size.
++//! Bucket b holds operands of [2^(b-1), 2^b) words (bucket 0: zero). At process exit, if SB_SIZE_HIST
++//! names a file, one line per (op, bucket) is appended: `pid op bucket count words_sum small_count[...]`.
++use std::sync::atomic::{AtomicU64, Ordering::Relaxed};
++
++pub const OPS: &[&str] = &[
++    "Add", "Sub", "Mul", "Div", "Rem", "BitAnd", "BitOr", "BitXor", "Add_prim", "Sub_prim", "Mul_prim", "Div_prim",
++    "Rem_prim", "BitAnd_prim", "BitOr_prim", "BitXor_prim", "gcd", "div_rem", "conv", "Shl", "Shr",
++];
++const NB: usize = 26;
++const Z: AtomicU64 = AtomicU64::new(0);
++const ROW: [AtomicU64; NB] = [Z; NB];
++static COUNT: [[AtomicU64; NB]; 21] = [ROW; 21];
++static WORDS: [[AtomicU64; NB]; 21] = [ROW; 21];
++/// for Mul: counts by (larger bucket, smaller bucket)
++static MUL2: [[AtomicU64; NB]; NB] = [ROW; NB];
++
++fn bucket(words: usize) -> usize {
++    if words == 0 { 0 } else { ((usize::BITS - words.leading_zeros()) as usize).min(NB - 1) }
++}
++
++fn idx(op: &str) -> usize {
++    OPS.iter().position(|o| *o == op).unwrap_or(OPS.len() - 1)
++}
++
++#[inline(never)]
++pub fn rec(op: &str, a: usize, b: usize) {
++    let i = idx(op);
++    let big = a.max(b);
++    let k = bucket(big);
++    COUNT[i][k].fetch_add(1, Relaxed);
++    WORDS[i][k].fetch_add((a + b) as u64, Relaxed);
++    if op == "Mul" {
++        MUL2[k][bucket(a.min(b))].fetch_add(1, Relaxed);
++    }
++}
++
++pub trait Words {
++    fn nwords(&self) -> usize;
++}
++impl Words for dashu_int::IBig {
++    fn nwords(&self) -> usize {
++        self.as_sign_words().1.len()
++    }
++}
++impl Words for dashu_int::UBig {
++    fn nwords(&self) -> usize {
++        self.as_words().len()
++    }
++}
++#[inline]
++pub fn words<T: Words>(x: &T) -> usize {
++    x.nwords()
++}
++
++extern "C" fn dump() {
++    let Ok(path) = std::env::var("SB_SIZE_HIST") else { return };
++    let mut out = String::new();
++    let pid = std::process::id();
++    for (i, op) in OPS.iter().enumerate() {
++        for k in 0..NB {
++            let c = COUNT[i][k].load(Relaxed);
++            if c > 0 {
++                out.push_str(&format!("{} {} {} {} {}\n", pid, op, k, c, WORDS[i][k].load(Relaxed)));
++            }
++        }
++    }
++    for k in 0..NB {
++        for j in 0..NB {
++            let c = MUL2[k][j].load(Relaxed);
++            if c > 0 {
++                out.push_str(&format!("{} Mul2 {}x{} {} 0\n", pid, k, j, c));
++            }
++        }
++    }
++    use std::io::Write;
++    if let Ok(mut f) = std::fs::OpenOptions::new().create(true).append(true).open(path) {
++        let _ = f.write_all(out.as_bytes());
++    }
++}
++
++#[allow(unsafe_code)]
++#[used]
++#[link_section = ".fini_array"]
++static DUMP_AT_EXIT: extern "C" fn() = dump;
