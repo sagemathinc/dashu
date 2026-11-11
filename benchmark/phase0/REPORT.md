@@ -17,7 +17,7 @@ Phase 0 of Sagebrush's big-integer plan (`design/bigint-plan.md`, item W0). It i
   - remainders by one word (the reductions mod each prime);
   - `malloc`/`free`;
   - one-word-by-many multiplications.
-- **The operands are small: 1 to 63 words (about 20 to 1,200 digits) almost everywhere.** A size histogram of the facade's operations (below) puts F4's operands at 15 words or less (katsura-8) and 31 or less (cyclic-7), mostly 4 to 7 words. The quintic class group is the only workload that reaches 5,000 to 10,000 digits, in 0.1% of its operations.
+- **The operands are small: 1 to 63 words (up to about 1,200 digits) almost everywhere.** A size histogram of the facade's operations (below) puts F4's operands at 15 words or less (katsura-8) and 31 or less (cyclic-7), mostly 4 to 7 words. The quintic class group is the only workload that reaches 5,000 to 10,000 digits, in 0.1% of its operations.
 - **Two workloads spend little time on big integers.**
   - Modular symbols (level 10007): 84% of its time is in its own word-size modular linear algebra (`sagebrush_modsym::linalg`: `dot_lazy`, `sub_mul`, `acc_mul`, all AVX2), and only about 0.2% in big-integer arithmetic.
   - The imaginary quadratic class group: about 10% in big integers, with most of its time in its own relation search and linear algebra.
