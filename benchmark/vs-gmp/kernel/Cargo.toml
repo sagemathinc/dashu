@@ -1,0 +1,24 @@
+[package]
+name = "vs-gmp-kernel"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+# (its own workspace: a standalone measuring crate, not a member of dashu's)
+[workspace]
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[[bin]]
+name = "vs-gmp"
+path = "src/main.rs"
+
+[dependencies]
+dashu-int = { path = "../../../integer" }
+dashu-base = { path = "../../../base" }
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
