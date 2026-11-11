@@ -17,7 +17,7 @@ Phase 0 of Sagebrush's big-integer plan (`design/bigint-plan.md`, item W0). It i
   - remainders by one word (the reductions mod each prime);
   - `malloc`/`free`;
   - one-word-by-many multiplications.
-- **The operands are small: 1 to 63 words (up to about 1,200 digits) almost everywhere.** A size histogram of the facade's operations (below) puts F4's operands at 15 words or less (katsura-8) and 31 or less (cyclic-7), mostly 4 to 7 words. The quintic class group is the only workload that reaches 5,000 to 10,000 digits, in 0.1% of its operations.
+- **The operands are small: 1 to 63 words (up to about 1,200 digits) almost everywhere.** A size histogram of the facade's operations (below) puts F4's operands at 15 words or less (katsura-8) and 31 or less (cyclic-7), mostly 2 to 7 words. The quintic class group is the only workload above 63 words: 0.5% of its operations, but about 10% of its operand words, some of them at 5,000 to 10,000 digits.
 - **Two workloads spend little time on big integers.**
   - Modular symbols (level 10007): 84% of its time is in its own word-size modular linear algebra (`sagebrush_modsym::linalg`: `dot_lazy`, `sub_mul`, `acc_mul`, all AVX2), and only about 0.2% in big-integer arithmetic.
   - The imaginary quadratic class group: about 10% in big integers, with most of its time in its own relation search and linear algebra.
@@ -90,7 +90,7 @@ A local measuring patch to Sagebrush's integer facade at `4d4225f9` (`profile/si
 |---|---:|---|---|
 | F4 over $\mathbb{Q}$, katsura-8 | 173 million | 4-7 words: 69% of operations, 81% of operand words; 2-3 words: 27% | 8-15 words (0.4%) |
 | F4 over $\mathbb{Q}$, cyclic-7 | 136 million | 4-7 words: 42%; 2-3 words: 27%; 8-15 words: 13%; 1 word: 14% | 16-31 words (5%) |
-| class group, quintic | 79 million | 1 word: 78% of operations; by operand words, 32-63 words: 57% | 256-511 words (0.1% of operations, 3.9% of operand words) |
+| class group, quintic | 79 million | 1 word: 78% of operations; by operand words, 32-63 words: 57% | 256-511 words (0.1% of operations, 3.9% of operand words); 64-127 words: 0.4% of operations, 6.0% of operand words |
 | class group, imaginary quadratic | 1.6 million | 2-3 words: 78%; 4-7 words: 19% | 16-31 words (under 0.05%) |
 | modular symbols, level 10007 | 0.7 million (all additions) | 16-31 words: 42%; 8-15 words: 35% | 16-31 words |
 | ECM | 27 thousand | 1-7 words | 8-15 words (0.5%) |
@@ -144,7 +144,7 @@ Each big integer crosses as a decimal string in JSON: V8 prints it, dashu parses
 2. **gcd at small and medium sizes, and rational reconstruction (W6).** gcd is 6 to 12% of F4, and rational reconstruction is the weakest kernel against GMP.
 3. **Move ECM's Montgomery arithmetic into the shared crate** as a reusable modular context (W4b), then measure it against GMP's modular powers (dashu's own powmod is 1.7 to 3.2 times GMP with assembly).
 4. **Hex at the boundary (W7a)** is cheap and low risk.
-5. **The large-size items (W1, W4a, W5) can wait.** In the profiled exact workloads, operands stay below about 1,200 digits except for a sliver of the quintic class group. The mpmath core at high precision is the one place they would matter, and it is still unmeasured.
+5. **The large-size items (W1, W4a, W5) can wait.** In the profiled exact workloads, operands stay below about 1,200 digits except in the quintic class group (0.5% of its operations, about 10% of its operand words). The mpmath core at high precision is the one place they would matter, and it is still unmeasured.
 
 ## Still to measure
 
