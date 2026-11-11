@@ -145,8 +145,9 @@ fn add_signed_mul_repr(x: Repr, sign: Sign, a: TypedReprRef, b: TypedReprRef) ->
     }
     let (xsign, x) = x.into_sign_typed();
     let mut buffer = match x {
-        // a small accumulator and a small product: the ordinary operators
-        // stay on the stack
+        // an inline accumulator and inline factors: the ordinary operators,
+        // as before (they allocate only when the product or the sum needs
+        // more than two words)
         Small(dw) if matches!((a, b), (RefSmall(_), RefSmall(_))) => {
             let x = Repr::from_dword(dw).with_sign(xsign);
             let product = a * b;
