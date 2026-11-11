@@ -50,7 +50,7 @@ sub_all(r"^(\s+)\$t\((&?self\.0) (<<|>>) (.*)\)$",
 methods = {
     "pow": None, "sqrt": None, "nth_root": None, "cbrt": None,
     "gcd": "other", "lcm": "other", "extended_gcd": "other", "div_rem": "d", "div_mod_floor": "d",
-    "modpow": "m", "modinv": "m",
+    "modpow": "m", "modinv": "m", "div_floor": "d", "mod_floor": "d", "is_multiple_of": "other",
 }
 def method_hook(m):
     indent, sig, name = m.group(1), m.group(2), m.group(3)
@@ -58,6 +58,8 @@ def method_hook(m):
     o = "%s(&%s.0)" % (W, other) if other else "0"
     return '%s%s {\n%s    %s("%s", %s(&self.0), %s);' % (indent, sig, indent, H, name, W, o)
 sub_all(r"^(\s+)((?:pub )?fn (%s)\(&?self[^)]*\)[^{]*)\{$" % "|".join(methods), method_hook, 10)
+# BigInt's div_floor and mod_floor go through its counted div_mod_floor: no second hook there
+sub_all(r"^\s+crate::sizehist::rec\(\"(div_floor|mod_floor)\", [^\n]*\n(\s+self\.div_mod_floor\(d\))", r"\2", 2)
 # 8. conversions (kept apart from arithmetic by the summary)
 sub_all(r"^(\s+)pub fn to_u64_digits\(&self\) -> \(Sign, Vec<u64>\) \{$",
         r'\1pub fn to_u64_digits(&self) -> (Sign, Vec<u64>) {\n\1    %s("conv", %s(&self.0), 0);' % (H, W), 1)
