@@ -35,13 +35,14 @@ Not measured: a whole engine call, JSON serialization of a request, and raw word
 **D. Real workloads, natively** (`profile/`). Measured: `perf` profiles of native builds, one thread each, sorted into kinds of work by `profile/classify.py`:
 - F4 over $\mathbb{Q}$: katsura-8 and cyclic-7;
 - a class group in a quintic number field;
-- ECM.
+- ECM;
+- modular symbols at level 10007, and an imaginary quadratic class group (a second run, `profile/vm4-run2.sh`, sampling the pinned core for the workload's lifetime).
 
-Attempted, but not captured or not valid (see `REPORT.md`): modular symbols at a large level, an imaginary quadratic class group, and mpmath at high precision.
+Also measured: the operand-size histogram. It is counts of the facade's operations by operand size, from a local measuring patch (`profile/size-hist.patch`, applied by `profile/hook-sizehist.py`) that is never part of Sagebrush. Results are in `results/hist/`, summarized by `profile/hist-summary.py`.
 
-Planned, not done:
-- the operand-size histogram (from a local, uncommitted build of the facade);
-- the profiles in WebAssembly.
+Attempted, but not valid (see `REPORT.md`): mpmath at high precision.
+
+Planned, not done: the profiles in WebAssembly.
 
 ## Method
 

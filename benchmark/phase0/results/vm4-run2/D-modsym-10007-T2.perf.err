@@ -1,0 +1,2 @@
+[ perf record: Woken up 4 times to write data ]
+[ perf record: Captured and wrote 1.062 MB out/D-modsym-10007-T2.perf.data (16479 samples) ]

@@ -1,0 +1,15 @@
+START 2026-11-11T08:15:03Z pgid=4151982 host=cocalc-d7c19ab4ccbe6bf7e-p-vm-60c64fe5c74646bab9c52341
+=== build-py 2026-11-11T08:15:03Z
+warning: `sagebrush-py` (lib) generated 6 warnings
+    Finished `release` profile [optimized + debuginfo] target(s) in 2m 24s
+build rc=0
+warm rc=0
+=== classgroup-imagquad 2026-11-11T08:17:28Z
+classgroup-imagquad perf rc=0 workload rc=0 wpid=4153852
+classgroup-imagquad report(pid) rc=0 lines=156
+classgroup-imagquad perf.data removed: ls: cannot access 'out/D-classgroup-imagquad.perf.data*': No such file or directory
+=== modsym-10007-T2 2026-11-11T08:17:31Z
+modsym-10007-T2 perf rc=0 workload rc=0 wpid=4153882
+modsym-10007-T2 report(pid) rc=0 lines=211
+modsym-10007-T2 perf.data removed: ls: cannot access 'out/D-modsym-10007-T2.perf.data*': No such file or directory
+ALL DONE 2026-11-11T08:17:50Z
