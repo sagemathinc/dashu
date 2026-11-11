@@ -36,7 +36,7 @@ Not measured: a whole engine call, JSON serialization of a request, and raw word
 - F4 over $\mathbb{Q}$: katsura-8 and cyclic-7;
 - a class group in a quintic number field;
 - ECM;
-- modular symbols at level 10007, and an imaginary quadratic class group (a second run, `profile/vm4-run2.sh`, sampling the pinned core for the workload's lifetime).
+- modular symbols at level 10007, and an imaginary quadratic class group (a second run, `profile/vm4-run3.sh`, sampling the pinned core for the workload's whole lifetime behind a start barrier).
 
 Also measured: the operand-size histogram. It is counts of the facade's operations by operand size, from a local measuring patch (`profile/size-hist.patch`, applied by `profile/hook-sizehist.py`) that is never part of Sagebrush. Results are in `results/hist/`, summarized by `profile/hist-summary.py`.
 

@@ -1,3 +1,0 @@
-    97.36%  python3  4153889:python3
-     1.95%  swapper        0:swapper
-     0.69%  python3  4153882:python3

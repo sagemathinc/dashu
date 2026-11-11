@@ -17,10 +17,10 @@ Phase 0 of Sagebrush's big-integer plan (`design/bigint-plan.md`, item W0). It i
   - remainders by one word (the reductions mod each prime);
   - `malloc`/`free`;
   - one-word-by-many multiplications.
-- **The operands are small: 1 to 63 words (up to about 1,200 digits) almost everywhere.** A size histogram of the facade's operations (below) puts F4's operands at 15 words or less (katsura-8) and 31 or less (cyclic-7), mostly 2 to 7 words. The quintic class group is the only workload above 63 words: 0.5% of its operations, but about 10% of its operand words, some of them at 5,000 to 10,000 digits.
+- **The operands are small: 1 to 63 words (up to about 1,200 digits) almost everywhere.** A size histogram of the facade's operations (below) puts F4's operands at 15 words or less (katsura-8) and 31 or less (cyclic-7), mostly 2 to 7 words. The quintic class group is the only workload above 63 words: 1.9% of its operations, but about 18% of its operand words, some of them at 5,000 to 10,000 digits.
 - **Two workloads spend little time on big integers.**
-  - Modular symbols (level 10007): 84% of its time is in its own word-size modular linear algebra (`sagebrush_modsym::linalg`: `dot_lazy`, `sub_mul`, `acc_mul`, all AVX2), and only about 0.2% in big-integer arithmetic.
-  - The imaginary quadratic class group: about 10% in big integers, with most of its time in its own relation search and linear algebra.
+  - Modular symbols (level 10007): 82% of its time is in its own word-size modular linear algebra (`sagebrush_modsym::linalg`: `dot_lazy`, `sub_mul`, `acc_mul`, all AVX2), and only about 0.2% in big-integer arithmetic.
+  - The imaginary quadratic class group: about 6% in big integers. Most of its time is in its own relation search and linear algebra, and in Python's startup (the whole run is 1.6 s).
 - **ECM has its own integer arithmetic.** Factoring spends 99% of its time in `sagebrush_classgroup::nf::ecm::Mont`, a fixed-size Montgomery multiplication written inside the class-group crate. It is integer arithmetic outside the shared crate. The shared-crate rule says it belongs in `sagebrush-bigint`, as the reusable-inverse context of plan item W4b.
 - **Next to GMP, at the sizes that matter** (1 to 128 words):
   - dashu is 1.2 to 3.5 times slower than GMP with assembly on multiplication, multiply-and-add and modular powers at every size, and on division from 4 words up (2n/n division also at 2 words). It is faster only on division at the smallest sizes: by one word at 1 to 2 words, and 2n/n at 1 word;
@@ -44,10 +44,10 @@ Native, one thread (`SAGEBRUSH_THREADS=1`), pinned to one core, profiled with `p
 | F4 over $\mathbb{Q}$, cyclic-7 | 8.4 s | **55.0%** | 13.3% | 12.3% | 16.7% |
 | class group, $x^5 - 3x^4 + 7x - 1234567$ | 6.9 s | **65.9%** | 8.1% | 0 | 24.4% |
 | ECM, three primes near $10^{23}$, $10^{25}$, $10^{27}$ | 14.9 s | 0 in dashu; **99%** in ECM's own Montgomery arithmetic | 0 | 0 | 99.8% |
-| modular symbols, level 10007, $T_2$'s characteristic polynomial | 16.4 s | about 0.2% | 2.0% | **84%** in its own modular linear algebra, plus 2.2% `__umodti3` (a 128-bit remainder at the word level) | 90.2% (the linear algebra included) |
-| class group, $\mathbb{Q}(\sqrt{-(10^{36}+237)})$ | 1.5 s | 9.7% | 6.8% | 0 | 64.1% |
+| modular symbols, level 10007, $T_2$'s characteristic polynomial | 16.4 s | about 0.2% | 1.9% | **82%** in its own modular linear algebra, plus 2.1% `__umodti3` (a 128-bit remainder at the word level) | 88.6% (the linear algebra included); Python 4.3% |
+| class group, $\mathbb{Q}(\sqrt{-(10^{36}+237)})$ | 1.5 s | 5.9% | 4.9% | 0 | 40.3%; Python 31.4%, mostly startup |
 
-The last two were profiled in a second run, sampling the pinned core for the workload's whole lifetime (`perf record -a -C 3`), because their work runs on threads that start after launch. The first run's attach-by-process (`perf record -p`) missed those threads. Files: `results/vm4-run2/`. The classifier counts `__umodti3` and `__udivti3` (compiler helpers for 128-bit division) as integer division; in modular symbols they come from word-size arithmetic, so the table above moves them to that column.
+The last two were profiled in a separate run (`profile/vm4-run3.sh`, files in `results/vm4-run3/`), because their work runs on threads that start after launch, which the first run's attach-by-process (`perf record -p`) missed. This run samples the pinned core system-wide (`perf record -a -C 3`) and keeps the workload's process (`perf report --pid`). The workload starts first but blocks on a FIFO, and only perf's own child command releases it, so sampling covers its whole lifetime. The log shows it: each workload was blocked before perf started, and perf's child started before the release (for modular symbols at 08:42:33.106822Z, released at 08:42:33.108316Z). Since the profile covers the whole process, Python's startup now shows, which matters only for the 1.6 s class group. The classifier counts `__umodti3` and `__udivti3` (compiler helpers for 128-bit division) as integer division; in modular symbols they come from word-size arithmetic, so the table above moves them to that column.
 
 In F4 over $\mathbb{Q}$ (katsura-8), the integer share splits as:
 - representation, addition and conversion: 19%;
@@ -84,16 +84,16 @@ The class group's top functions:
 
 ### Operand sizes
 
-A local measuring patch to Sagebrush's integer facade at `4d4225f9` (`profile/size-hist.patch`, never part of Sagebrush) counts every arithmetic operation on its `BigInt` and `BigUint` by the size of the larger operand, with buckets of $[2^{b-1}, 2^b)$ words. The workloads are the same, run natively on one thread. These are counts, not times, so the "operand words" column (the sum of both operands' words) is only a rough proxy for cost. Files: `results/hist/`; summary: `profile/hist-summary.py`.
+A local measuring patch to Sagebrush's integer facade at `4d4225f9` (`profile/size-hist.patch`, never part of Sagebrush) counts the arithmetic operations on its `BigInt` and `BigUint` by the size of the larger operand, with buckets of $[2^{b-1}, 2^b)$ words. It hooks every arithmetic entry point of the facade (`profile/hook-sizehist.py` applies it): the operators of both types (`+`, `-`, `*`, `/`, `%`, the bit operations and the shifts, in their reference, primitive and assignment forms), and the named methods (`pow`, `sqrt`, `nth_root`, `gcd`, `lcm`, `extended_gcd`, `div_rem`, `div_mod_floor`, `modpow`, `modinv`). Conversions to and from words or bytes are counted apart and left out of the table. Comparisons, negation and absolute value are not counted. A counted method that calls another counted method (`lcm` calls `gcd`) counts both, and operations inside a counted one (the half-gcd's products) are not counted separately. The workloads are the same, run natively on one thread. These are counts, not times, so the "operand words" column (the sum of both operands' words) is only a rough proxy for cost. Files: `results/hist/`; summary: `profile/hist-summary.py`.
 
 | workload | operations | where the operations are (by larger operand) | the largest bucket reached |
 |---|---:|---|---|
 | F4 over $\mathbb{Q}$, katsura-8 | 173 million | 4-7 words: 69% of operations, 81% of operand words; 2-3 words: 27% | 8-15 words (0.4%) |
 | F4 over $\mathbb{Q}$, cyclic-7 | 136 million | 4-7 words: 42%; 2-3 words: 27%; 8-15 words: 13%; 1 word: 14% | 16-31 words (5%) |
-| class group, quintic | 79 million | 1 word: 78% of operations; by operand words, 32-63 words: 57% | 256-511 words (0.1% of operations, 3.9% of operand words); 64-127 words: 0.4% of operations, 6.0% of operand words |
-| class group, imaginary quadratic | 1.6 million | 2-3 words: 78%; 4-7 words: 19% | 16-31 words (under 0.05%) |
-| modular symbols, level 10007 | 0.7 million (all additions) | 16-31 words: 42%; 8-15 words: 35% | 16-31 words |
-| ECM | 27 thousand | 1-7 words | 8-15 words (0.5%) |
+| class group, quintic | 89 million | 1 word: 71% of operations; by operand words, 32-63 words: 59% | 256-511 words (0.1% of operations, 2.6% of operand words); 64-127 words: 1.8% of operations, 15.1% of operand words |
+| class group, imaginary quadratic | 4.1 million (mostly shifts) | 2-3 words: 77%; 4-7 words: 19% | 16-31 words (under 0.05%) |
+| modular symbols, level 10007 | 1.1 million (additions and products) | 16-31 words: 40%; 8-15 words: 34% | 32-63 words (under 0.05%) |
+| ECM | 0.17 million | 1-7 words | 8-15 words (0.2%) |
 
 The histogram sees only the facade. ECM's own Montgomery arithmetic, the word-level work inside `MultiCrt`, and any direct use of dashu in an engine crate are not counted.
 
@@ -144,7 +144,7 @@ Each big integer crosses as a decimal string in JSON: V8 prints it, dashu parses
 2. **gcd at small and medium sizes, and rational reconstruction (W6).** gcd is 6 to 12% of F4, and rational reconstruction is the weakest kernel against GMP.
 3. **Move ECM's Montgomery arithmetic into the shared crate** as a reusable modular context (W4b), then measure it against GMP's modular powers (dashu's own powmod is 1.7 to 3.2 times GMP with assembly).
 4. **Hex at the boundary (W7a)** is cheap and low risk.
-5. **The large-size items (W1, W4a, W5) can wait.** In the profiled exact workloads, operands stay below about 1,200 digits except in the quintic class group (0.5% of its operations, about 10% of its operand words). The mpmath core at high precision is the one place they would matter, and it is still unmeasured.
+5. **The large-size items (W1, W4a, W5) can wait.** In the profiled exact workloads, operands stay below about 1,200 digits except in the quintic class group (1.9% of its operations, about 18% of its operand words). The mpmath core at high precision is the one place they would matter, and it is still unmeasured.
 
 ## Still to measure
 

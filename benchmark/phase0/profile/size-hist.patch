@@ -1,16 +1,100 @@
 diff --git a/engine/bigint/src/dashu_impl.rs b/engine/bigint/src/dashu_impl.rs
-index ff446ee71..a5fca3013 100644
+index ff446ee71..582169dd4 100644
 --- a/engine/bigint/src/dashu_impl.rs
 +++ b/engine/bigint/src/dashu_impl.rs
-@@ -144,6 +144,7 @@ pub fn mul_ubig(a: &UBig, b: &UBig) -> UBig {
- 
- /// a * b for signed integers (see [`mul_ubig`]).
- pub fn mul_ibig(a: &IBig, b: &IBig) -> IBig {
-+    crate::sizehist::rec("Mul", crate::sizehist::words(a), crate::sizehist::words(b));
-     #[cfg(target_pointer_width = "64")]
-     {
-         let (sa, wa) = a.as_sign_words();
-@@ -267,6 +268,7 @@ macro_rules! binop {
+@@ -173,6 +173,7 @@ macro_rules! binop_mul {
+             type Output = BigInt;
+             #[inline]
+             fn mul(self, r: BigInt) -> BigInt {
++                crate::sizehist::rec("Mul", crate::sizehist::words(&self.0), crate::sizehist::words(&r.0));
+                 BigInt(mul_ibig(&self.0, &r.0))
+             }
+         }
+@@ -180,6 +181,7 @@ macro_rules! binop_mul {
+             type Output = BigInt;
+             #[inline]
+             fn mul(self, r: &BigInt) -> BigInt {
++                crate::sizehist::rec("Mul", crate::sizehist::words(&self.0), crate::sizehist::words(&r.0));
+                 BigInt(mul_ibig(&self.0, &r.0))
+             }
+         }
+@@ -187,6 +189,7 @@ macro_rules! binop_mul {
+             type Output = BigInt;
+             #[inline]
+             fn mul(self, r: BigInt) -> BigInt {
++                crate::sizehist::rec("Mul", crate::sizehist::words(&self.0), crate::sizehist::words(&r.0));
+                 BigInt(mul_ibig(&self.0, &r.0))
+             }
+         }
+@@ -194,18 +197,21 @@ macro_rules! binop_mul {
+             type Output = BigInt;
+             #[inline]
+             fn mul(self, r: &BigInt) -> BigInt {
++                crate::sizehist::rec("Mul", crate::sizehist::words(&self.0), crate::sizehist::words(&r.0));
+                 BigInt(mul_ibig(&self.0, &r.0))
+             }
+         }
+         impl MulAssign<BigInt> for BigInt {
+             #[inline]
+             fn mul_assign(&mut self, r: BigInt) {
++                crate::sizehist::rec("Mul", crate::sizehist::words(&self.0), crate::sizehist::words(&r.0));
+                 self.0 = mul_ibig(&self.0, &r.0);
+             }
+         }
+         impl MulAssign<&BigInt> for BigInt {
+             #[inline]
+             fn mul_assign(&mut self, r: &BigInt) {
++                crate::sizehist::rec("Mul", crate::sizehist::words(&self.0), crate::sizehist::words(&r.0));
+                 self.0 = mul_ibig(&self.0, &r.0);
+             }
+         }
+@@ -219,6 +225,7 @@ macro_rules! ubinop_mul {
+             type Output = BigUint;
+             #[inline]
+             fn mul(self, r: BigUint) -> BigUint {
++                crate::sizehist::rec("Mul", crate::sizehist::words(&self.0), crate::sizehist::words(&r.0));
+                 BigUint(mul_ubig(&self.0, &r.0))
+             }
+         }
+@@ -226,6 +233,7 @@ macro_rules! ubinop_mul {
+             type Output = BigUint;
+             #[inline]
+             fn mul(self, r: &BigUint) -> BigUint {
++                crate::sizehist::rec("Mul", crate::sizehist::words(&self.0), crate::sizehist::words(&r.0));
+                 BigUint(mul_ubig(&self.0, &r.0))
+             }
+         }
+@@ -233,6 +241,7 @@ macro_rules! ubinop_mul {
+             type Output = BigUint;
+             #[inline]
+             fn mul(self, r: BigUint) -> BigUint {
++                crate::sizehist::rec("Mul", crate::sizehist::words(&self.0), crate::sizehist::words(&r.0));
+                 BigUint(mul_ubig(&self.0, &r.0))
+             }
+         }
+@@ -240,18 +249,21 @@ macro_rules! ubinop_mul {
+             type Output = BigUint;
+             #[inline]
+             fn mul(self, r: &BigUint) -> BigUint {
++                crate::sizehist::rec("Mul", crate::sizehist::words(&self.0), crate::sizehist::words(&r.0));
+                 BigUint(mul_ubig(&self.0, &r.0))
+             }
+         }
+         impl MulAssign<BigUint> for BigUint {
+             #[inline]
+             fn mul_assign(&mut self, r: BigUint) {
++                crate::sizehist::rec("Mul", crate::sizehist::words(&self.0), crate::sizehist::words(&r.0));
+                 self.0 = mul_ubig(&self.0, &r.0);
+             }
+         }
+         impl MulAssign<&BigUint> for BigUint {
+             #[inline]
+             fn mul_assign(&mut self, r: &BigUint) {
++                crate::sizehist::rec("Mul", crate::sizehist::words(&self.0), crate::sizehist::words(&r.0));
+                 self.0 = mul_ubig(&self.0, &r.0);
+             }
+         }
+@@ -267,6 +279,7 @@ macro_rules! binop {
              type Output = BigInt;
              #[inline]
              fn $m(self, r: BigInt) -> BigInt {
@@ -18,7 +102,7 @@ index ff446ee71..a5fca3013 100644
                  BigInt(self.0 $op r.0)
              }
          }
-@@ -274,6 +276,7 @@ macro_rules! binop {
+@@ -274,6 +287,7 @@ macro_rules! binop {
              type Output = BigInt;
              #[inline]
              fn $m(self, r: &BigInt) -> BigInt {
@@ -26,7 +110,7 @@ index ff446ee71..a5fca3013 100644
                  BigInt(self.0 $op &r.0)
              }
          }
-@@ -281,6 +284,7 @@ macro_rules! binop {
+@@ -281,6 +295,7 @@ macro_rules! binop {
              type Output = BigInt;
              #[inline]
              fn $m(self, r: BigInt) -> BigInt {
@@ -34,7 +118,7 @@ index ff446ee71..a5fca3013 100644
                  BigInt(&self.0 $op r.0)
              }
          }
-@@ -288,12 +292,14 @@ macro_rules! binop {
+@@ -288,12 +303,14 @@ macro_rules! binop {
              type Output = BigInt;
              #[inline]
              fn $m(self, r: &BigInt) -> BigInt {
@@ -49,7 +133,7 @@ index ff446ee71..a5fca3013 100644
                  let a = std::mem::take(&mut self.0);
                  self.0 = a $op r.0;
              }
-@@ -301,6 +307,7 @@ macro_rules! binop {
+@@ -301,6 +318,7 @@ macro_rules! binop {
          impl $atr<&BigInt> for BigInt {
              #[inline]
              fn $am(&mut self, r: &BigInt) {
@@ -57,7 +141,7 @@ index ff446ee71..a5fca3013 100644
                  let a = std::mem::take(&mut self.0);
                  self.0 = a $op &r.0;
              }
-@@ -314,6 +321,7 @@ macro_rules! binop_prims {
+@@ -314,6 +332,7 @@ macro_rules! binop_prims {
              type Output = BigInt;
              #[inline]
              fn $m(self, r: $p) -> BigInt {
@@ -65,7 +149,7 @@ index ff446ee71..a5fca3013 100644
                  BigInt(self.0 $op IBig::from(r))
              }
          }
-@@ -321,6 +329,7 @@ macro_rules! binop_prims {
+@@ -321,6 +340,7 @@ macro_rules! binop_prims {
              type Output = BigInt;
              #[inline]
              fn $m(self, r: $p) -> BigInt {
@@ -73,7 +157,7 @@ index ff446ee71..a5fca3013 100644
                  BigInt(&self.0 $op IBig::from(r))
              }
          }
-@@ -328,6 +337,7 @@ macro_rules! binop_prims {
+@@ -328,6 +348,7 @@ macro_rules! binop_prims {
              type Output = BigInt;
              #[inline]
              fn $m(self, r: BigInt) -> BigInt {
@@ -81,7 +165,7 @@ index ff446ee71..a5fca3013 100644
                  BigInt(IBig::from(self) $op r.0)
              }
          }
-@@ -335,12 +345,14 @@ macro_rules! binop_prims {
+@@ -335,12 +356,14 @@ macro_rules! binop_prims {
              type Output = BigInt;
              #[inline]
              fn $m(self, r: &BigInt) -> BigInt {
@@ -96,7 +180,70 @@ index ff446ee71..a5fca3013 100644
                  let a = std::mem::take(&mut self.0);
                  self.0 = a $op IBig::from(r);
              }
-@@ -454,6 +466,7 @@ macro_rules! ubinop {
+@@ -377,6 +400,7 @@ macro_rules! shifts {
+             type Output = $t;
+             #[inline]
+             fn shl(self, n: $p) -> $t {
++                crate::sizehist::rec("Shl", crate::sizehist::words(&self.0), 0);
+                 $t(self.0 << usize::try_from(n).expect("shift amount"))
+             }
+         }
+@@ -384,6 +408,7 @@ macro_rules! shifts {
+             type Output = $t;
+             #[inline]
+             fn shl(self, n: $p) -> $t {
++                crate::sizehist::rec("Shl", crate::sizehist::words(&self.0), 0);
+                 $t(&self.0 << usize::try_from(n).expect("shift amount"))
+             }
+         }
+@@ -391,6 +416,7 @@ macro_rules! shifts {
+             type Output = $t;
+             #[inline]
+             fn shr(self, n: $p) -> $t {
++                crate::sizehist::rec("Shr", crate::sizehist::words(&self.0), 0);
+                 $t(self.0 >> usize::try_from(n).expect("shift amount"))
+             }
+         }
+@@ -398,6 +424,7 @@ macro_rules! shifts {
+             type Output = $t;
+             #[inline]
+             fn shr(self, n: $p) -> $t {
++                crate::sizehist::rec("Shr", crate::sizehist::words(&self.0), 0);
+                 $t(&self.0 >> usize::try_from(n).expect("shift amount"))
+             }
+         }
+@@ -427,6 +454,7 @@ macro_rules! ubinop {
+             type Output = BigUint;
+             #[inline]
+             fn $m(self, r: BigUint) -> BigUint {
++                crate::sizehist::rec(stringify!($tr), crate::sizehist::words(&self.0), crate::sizehist::words(&r.0));
+                 BigUint(self.0 $op r.0)
+             }
+         }
+@@ -434,6 +462,7 @@ macro_rules! ubinop {
+             type Output = BigUint;
+             #[inline]
+             fn $m(self, r: &BigUint) -> BigUint {
++                crate::sizehist::rec(stringify!($tr), crate::sizehist::words(&self.0), crate::sizehist::words(&r.0));
+                 BigUint(self.0 $op &r.0)
+             }
+         }
+@@ -441,6 +470,7 @@ macro_rules! ubinop {
+             type Output = BigUint;
+             #[inline]
+             fn $m(self, r: BigUint) -> BigUint {
++                crate::sizehist::rec(stringify!($tr), crate::sizehist::words(&self.0), crate::sizehist::words(&r.0));
+                 BigUint(&self.0 $op r.0)
+             }
+         }
+@@ -448,12 +478,14 @@ macro_rules! ubinop {
+             type Output = BigUint;
+             #[inline]
+             fn $m(self, r: &BigUint) -> BigUint {
++                crate::sizehist::rec(stringify!($tr), crate::sizehist::words(&self.0), crate::sizehist::words(&r.0));
+                 BigUint(&self.0 $op &r.0)
+             }
+         }
          impl $atr<BigUint> for BigUint {
              #[inline]
              fn $am(&mut self, r: BigUint) {
@@ -104,7 +251,7 @@ index ff446ee71..a5fca3013 100644
                  let a = std::mem::take(&mut self.0);
                  self.0 = a $op r.0;
              }
-@@ -461,6 +474,7 @@ macro_rules! ubinop {
+@@ -461,6 +493,7 @@ macro_rules! ubinop {
          impl $atr<&BigUint> for BigUint {
              #[inline]
              fn $am(&mut self, r: &BigUint) {
@@ -112,28 +259,160 @@ index ff446ee71..a5fca3013 100644
                  let a = std::mem::take(&mut self.0);
                  self.0 = a $op &r.0;
              }
-@@ -710,6 +724,7 @@ impl num_integer::Integer for BigInt {
+@@ -474,6 +507,7 @@ macro_rules! ubinop_prims {
+             type Output = BigUint;
+             #[inline]
+             fn $m(self, r: $p) -> BigUint {
++                crate::sizehist::rec(concat!(stringify!($tr), "_prim"), crate::sizehist::words(&self.0), 1);
+                 BigUint(self.0 $op UBig::from(r))
+             }
+         }
+@@ -481,12 +515,14 @@ macro_rules! ubinop_prims {
+             type Output = BigUint;
+             #[inline]
+             fn $m(self, r: $p) -> BigUint {
++                crate::sizehist::rec(concat!(stringify!($tr), "_prim"), crate::sizehist::words(&self.0), 1);
+                 BigUint(&self.0 $op UBig::from(r))
+             }
+         }
+         impl $atr<$p> for BigUint {
+             #[inline]
+             fn $am(&mut self, r: $p) {
++                crate::sizehist::rec(concat!(stringify!($tr), "_prim"), crate::sizehist::words(&self.0), 1);
+                 let a = std::mem::take(&mut self.0);
+                 self.0 = a $op UBig::from(r);
+             }
+@@ -689,13 +725,15 @@ impl num_traits::FromPrimitive for BigInt {
+ }
+ impl num_traits::Pow<u32> for BigInt {
+     type Output = BigInt;
+-    fn pow(self, e: u32) -> BigInt {
++    fn pow(self, e: u32) -> BigInt  {
++        crate::sizehist::rec("pow", crate::sizehist::words(&self.0), 0);
+         BigInt(self.0.pow(e as usize))
+     }
+ }
+ impl num_traits::Pow<u32> for &BigInt {
+     type Output = BigInt;
+-    fn pow(self, e: u32) -> BigInt {
++    fn pow(self, e: u32) -> BigInt  {
++        crate::sizehist::rec("pow", crate::sizehist::words(&self.0), 0);
+         BigInt(self.0.pow(e as usize))
+     }
+ }
+@@ -709,7 +747,8 @@ impl num_integer::Integer for BigInt {
+     fn mod_floor(&self, d: &Self) -> Self {
          self.div_mod_floor(d).1
      }
-     fn div_mod_floor(&self, d: &Self) -> (Self, Self) {
-+        crate::sizehist::rec("div_rem", crate::sizehist::words(&self.0), crate::sizehist::words(&d.0));
+-    fn div_mod_floor(&self, d: &Self) -> (Self, Self) {
++    fn div_mod_floor(&self, d: &Self) -> (Self, Self)  {
++        crate::sizehist::rec("div_mod_floor", crate::sizehist::words(&self.0), crate::sizehist::words(&d.0));
          let (q, r) = (&self.0).div_rem(&d.0);
          if !r.is_zero() && ((r < IBig::ZERO) != (d.0 < IBig::ZERO)) {
              (BigInt(q - IBig::ONE), BigInt(r + &d.0))
-@@ -718,10 +733,12 @@ impl num_integer::Integer for BigInt {
+@@ -717,11 +756,13 @@ impl num_integer::Integer for BigInt {
+             (BigInt(q), BigInt(r))
          }
      }
-     fn div_rem(&self, d: &Self) -> (Self, Self) {
+-    fn div_rem(&self, d: &Self) -> (Self, Self) {
++    fn div_rem(&self, d: &Self) -> (Self, Self)  {
 +        crate::sizehist::rec("div_rem", crate::sizehist::words(&self.0), crate::sizehist::words(&d.0));
          let (q, r) = (&self.0).div_rem(&d.0);
          (BigInt(q), BigInt(r))
      }
-     fn gcd(&self, other: &Self) -> Self {
+-    fn gcd(&self, other: &Self) -> Self {
++    fn gcd(&self, other: &Self) -> Self  {
 +        crate::sizehist::rec("gcd", crate::sizehist::words(&self.0), crate::sizehist::words(&other.0));
          // dashu panics for gcd(0, 0); num-bigint's is 0
          if self.0.is_zero() && other.0.is_zero() {
              return BigInt(IBig::ZERO);
-@@ -931,6 +948,7 @@ impl BigInt {
+@@ -732,7 +773,8 @@ impl num_integer::Integer for BigInt {
+         }
+         BigInt(IBig::from(a.gcd(&b)))
+     }
+-    fn lcm(&self, other: &Self) -> Self {
++    fn lcm(&self, other: &Self) -> Self  {
++        crate::sizehist::rec("lcm", crate::sizehist::words(&self.0), crate::sizehist::words(&other.0));
+         if self.0.is_zero() || other.0.is_zero() {
+             return BigInt(IBig::ZERO);
+         }
+@@ -755,7 +797,8 @@ impl num_integer::Integer for BigInt {
+     fn is_odd(&self) -> bool {
+         self.0.bit(0)
+     }
+-    fn extended_gcd(&self, other: &Self) -> num_integer::ExtendedGcd<Self> {
++    fn extended_gcd(&self, other: &Self) -> num_integer::ExtendedGcd<Self>  {
++        crate::sizehist::rec("extended_gcd", crate::sizehist::words(&self.0), crate::sizehist::words(&other.0));
+         if self.0.is_zero() && other.0.is_zero() {
+             // num-integer's algorithm gives (0, 1, 0)
+             return num_integer::ExtendedGcd { gcd: BigInt(IBig::ZERO), x: BigInt(IBig::ONE), y: BigInt(IBig::ZERO) };
+@@ -772,7 +815,8 @@ impl num_integer::Integer for BigUint {
+     fn mod_floor(&self, d: &Self) -> Self {
+         BigUint(&self.0 % &d.0)
+     }
+-    fn gcd(&self, other: &Self) -> Self {
++    fn gcd(&self, other: &Self) -> Self  {
++        crate::sizehist::rec("gcd", crate::sizehist::words(&self.0), crate::sizehist::words(&other.0));
+         if self.0.is_zero() && other.0.is_zero() {
+             return BigUint(UBig::ZERO);
+         }
+@@ -781,7 +825,8 @@ impl num_integer::Integer for BigUint {
+         }
+         BigUint((&self.0).gcd(&other.0))
+     }
+-    fn lcm(&self, other: &Self) -> Self {
++    fn lcm(&self, other: &Self) -> Self  {
++        crate::sizehist::rec("lcm", crate::sizehist::words(&self.0), crate::sizehist::words(&other.0));
+         if self.0.is_zero() || other.0.is_zero() {
+             return BigUint(UBig::ZERO);
+         }
+@@ -803,7 +848,8 @@ impl num_integer::Integer for BigUint {
+     fn is_odd(&self) -> bool {
+         self.0.bit(0)
+     }
+-    fn div_rem(&self, d: &Self) -> (Self, Self) {
++    fn div_rem(&self, d: &Self) -> (Self, Self)  {
++        crate::sizehist::rec("div_rem", crate::sizehist::words(&self.0), crate::sizehist::words(&d.0));
+         let (q, r) = (&self.0).div_rem(&d.0);
+         (BigUint(q), BigUint(r))
+     }
+@@ -812,7 +858,8 @@ impl num_integer::Integer for BigUint {
+ impl num_integer::Roots for BigInt {
+     /// The n-th root, truncated toward zero (num-bigint panics for an even
+     /// root of a negative number; so does this).
+-    fn nth_root(&self, n: u32) -> Self {
++    fn nth_root(&self, n: u32) -> Self  {
++        crate::sizehist::rec("nth_root", crate::sizehist::words(&self.0), 0);
+         assert!(n > 0, "root degree 0");
+         if self.0 < IBig::ZERO {
+             assert!(n % 2 == 1, "even root of a negative number");
+@@ -820,7 +867,8 @@ impl num_integer::Roots for BigInt {
+         }
+         BigInt(IBig::from((&self.0).unsigned_abs().nth_root(n as usize)))
+     }
+-    fn sqrt(&self) -> Self {
++    fn sqrt(&self) -> Self  {
++        crate::sizehist::rec("sqrt", crate::sizehist::words(&self.0), 0);
+         BigInt::sqrt(self)
+     }
+ }
+@@ -895,11 +943,13 @@ impl BigInt {
+         }
+     }
+     #[inline]
+-    pub fn pow(&self, e: u32) -> BigInt {
++    pub fn pow(&self, e: u32) -> BigInt  {
++        crate::sizehist::rec("pow", crate::sizehist::words(&self.0), 0);
+         BigInt(self.0.pow(e as usize))
+     }
+     /// The integer square root (num-bigint panics on negative input; so does this).
+-    pub fn sqrt(&self) -> BigInt {
++    pub fn sqrt(&self) -> BigInt  {
++        crate::sizehist::rec("sqrt", crate::sizehist::words(&self.0), 0);
+         assert!(self.0 >= IBig::ZERO, "square root of a negative number");
+         BigInt(IBig::from((&self.0).unsigned_abs().sqrt()))
+     }
+@@ -931,6 +981,7 @@ impl BigInt {
          (self.sign(), BigUint((&self.0).unsigned_abs()))
      }
      pub fn to_u64_digits(&self) -> (Sign, Vec<u64>) {
@@ -141,7 +420,27 @@ index ff446ee71..a5fca3013 100644
          let mut d = le_bytes_to_u64(&(&self.0).unsigned_abs().to_le_bytes());
          while d.last() == Some(&0) {
              d.pop();
-@@ -1017,6 +1035,7 @@ impl BigInt {
+@@ -951,7 +1002,8 @@ impl BigInt {
+     }
+     /// self^e mod m, in [0, m) for m > 0 and (m, 0] for m < 0 (num-bigint's
+     /// semantics; it panics for m = 0 or e < 0).
+-    pub fn modpow(&self, e: &BigInt, m: &BigInt) -> BigInt {
++    pub fn modpow(&self, e: &BigInt, m: &BigInt) -> BigInt  {
++        crate::sizehist::rec("modpow", crate::sizehist::words(&self.0), crate::sizehist::words(&m.0));
+         assert!(e.0 >= IBig::ZERO, "negative exponent");
+         assert!(!m.0.is_zero(), "zero modulus");
+         let mm = (&m.0).unsigned_abs();
+@@ -984,7 +1036,8 @@ impl BigInt {
+     }
+     /// The inverse of self mod m, in [0, m) for m > 0 and (m, 0] for m < 0
+     /// (num-bigint's semantics), or None.
+-    pub fn modinv(&self, m: &BigInt) -> Option<BigInt> {
++    pub fn modinv(&self, m: &BigInt) -> Option<BigInt>  {
++        crate::sizehist::rec("modinv", crate::sizehist::words(&self.0), crate::sizehist::words(&m.0));
+         if m.0.is_zero() {
+             return None;
+         }
+@@ -1017,6 +1070,7 @@ impl BigInt {
          IBig::from_str_radix(s.strip_prefix('+').unwrap_or(s), radix).ok().map(BigInt)
      }
      pub fn from_bytes_le(sign: Sign, bytes: &[u8]) -> BigInt {
@@ -149,6 +448,31 @@ index ff446ee71..a5fca3013 100644
          BigInt::from_biguint(sign, BigUint(UBig::from_le_bytes(bytes)))
      }
      pub fn to_bytes_le(&self) -> (Sign, Vec<u8>) {
+@@ -1030,10 +1084,12 @@ impl BigUint {
+         self.0.bit_len() as u64
+     }
+     #[inline]
+-    pub fn pow(&self, e: u32) -> BigUint {
++    pub fn pow(&self, e: u32) -> BigUint  {
++        crate::sizehist::rec("pow", crate::sizehist::words(&self.0), 0);
+         BigUint(self.0.pow(e as usize))
+     }
+-    pub fn sqrt(&self) -> BigUint {
++    pub fn sqrt(&self) -> BigUint  {
++        crate::sizehist::rec("sqrt", crate::sizehist::words(&self.0), 0);
+         BigUint(self.0.sqrt())
+     }
+     pub fn to_u64_digits(&self) -> Vec<u64> {
+@@ -1053,7 +1109,8 @@ impl BigUint {
+     pub fn bit(&self, n: u64) -> bool {
+         self.0.bit(n as usize)
+     }
+-    pub fn modpow(&self, e: &BigUint, m: &BigUint) -> BigUint {
++    pub fn modpow(&self, e: &BigUint, m: &BigUint) -> BigUint  {
++        crate::sizehist::rec("modpow", crate::sizehist::words(&self.0), crate::sizehist::words(&m.0));
+         assert!(!m.0.is_zero(), "zero modulus");
+         let ring = dashu_int::fast_div::ConstDivisor::new(m.0.clone());
+         BigUint(ring.reduce(self.0.clone()).pow(&e.0).residue())
 diff --git a/engine/bigint/src/lib.rs b/engine/bigint/src/lib.rs
 index 22570c1f4..bd81e8839 100644
 --- a/engine/bigint/src/lib.rs
@@ -164,10 +488,10 @@ index 22570c1f4..bd81e8839 100644
  /// Long loops in this crate check for Ctrl-C (engine/interrupt).
 diff --git a/engine/bigint/src/sizehist.rs b/engine/bigint/src/sizehist.rs
 new file mode 100644
-index 000000000..a1352ea88
+index 000000000..46782b190
 --- /dev/null
 +++ b/engine/bigint/src/sizehist.rs
-@@ -0,0 +1,85 @@
+@@ -0,0 +1,86 @@
 +//! Phase 0 only (a local, uncommitted measuring patch): counts of the facade's operations by operand size.
 +//! Bucket b holds operands of [2^(b-1), 2^b) words (bucket 0: zero). At process exit, if SB_SIZE_HIST
 +//! names a file, one line per (op, bucket) is appended: `pid op bucket count words_sum small_count[...]`.
@@ -175,13 +499,14 @@ index 000000000..a1352ea88
 +
 +pub const OPS: &[&str] = &[
 +    "Add", "Sub", "Mul", "Div", "Rem", "BitAnd", "BitOr", "BitXor", "Add_prim", "Sub_prim", "Mul_prim", "Div_prim",
-+    "Rem_prim", "BitAnd_prim", "BitOr_prim", "BitXor_prim", "gcd", "div_rem", "conv", "Shl", "Shr",
++    "Rem_prim", "BitAnd_prim", "BitOr_prim", "BitXor_prim", "Shl", "Shr", "pow", "sqrt", "nth_root", "cbrt", "gcd",
++    "lcm", "extended_gcd", "div_rem", "div_mod_floor", "modpow", "modinv", "conv", "other",
 +];
 +const NB: usize = 26;
 +const Z: AtomicU64 = AtomicU64::new(0);
 +const ROW: [AtomicU64; NB] = [Z; NB];
-+static COUNT: [[AtomicU64; NB]; 21] = [ROW; 21];
-+static WORDS: [[AtomicU64; NB]; 21] = [ROW; 21];
++static COUNT: [[AtomicU64; NB]; 31] = [ROW; 31];
++static WORDS: [[AtomicU64; NB]; 31] = [ROW; 31];
 +/// for Mul: counts by (larger bucket, smaller bucket)
 +static MUL2: [[AtomicU64; NB]; NB] = [ROW; NB];
 +
