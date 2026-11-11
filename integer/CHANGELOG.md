@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Add
+- `UBig::add_mul_assign`, `IBig::add_mul_assign` and `IBig::sub_mul_assign`: fused
+  `x += a * b` and `x -= a * b` that accumulate the product into `x`'s own buffer
+  instead of allocating a temporary, propagating only the carry or borrow above the
+  product's length.
+
 ### Change
 - Use sign conversions, dedicated square/cube operations, divisibility checks, and bit tests
   consistently with the house lints, preserving integer arithmetic behavior.

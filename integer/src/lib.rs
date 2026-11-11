@@ -121,6 +121,7 @@ mod memory;
 pub mod modular;
 pub mod monty;
 mod mul;
+mod mul_add;
 mod mul_ops;
 pub mod ops;
 mod parse;
