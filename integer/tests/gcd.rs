@@ -1,4 +1,5 @@
 use dashu_int::ops::{ExtendedGcd, Gcd};
+use dashu_int::{IBig, UBig};
 
 mod helper_macros;
 
@@ -193,4 +194,50 @@ fn test_gcd_large_lopsided_reduction() {
 
     // gcd(L+R, L) = gcd(L, R) = gcd(Q*R+1, R) = gcd(1, R) = 1.
     assert_eq!((&a).gcd(&b), ubig!(1));
+}
+
+/// A pair whose extended gcd takes a euclidean step with a quotient of one word (q_lo
+/// empty) while the rhs coefficient being updated is a word longer than the other: the
+/// update used to cover only len(q) + len(t1) words and write the carry over t0's high
+/// word, giving the right gcd with wrong coefficients. The pair, both argument orders
+/// and signs, its +-k neighbours (each of which took the same path), and the modular
+/// inverse (built on the same extended gcd).
+#[test]
+fn test_gcd_ext_small_quotient_long_coefficient() {
+    use dashu_int::fast_div::ConstDivisor;
+    let p = UBig::from_str_radix(
+        "3e305effa6bf927ddf078324565301a9e1aab659637a2771aa0f4de1fbe63cba2e987e1d4b50035ca373247017db5b73878e5189174fe80eb41e140024dcb69e88efd1beb1543647c167689a59794e7c4ed41516c42df9c75908b4ca6fe41a48c0581cba7c9a90d286c0df21198ac314f9d2e53248d790d152fb8651e6338a1aba6",
+        16,
+    )
+    .unwrap();
+    let a = UBig::from_str_radix(
+        "21a005a143e3b14283ba84db2d9700a84d51263e60a4e8eb97ba35712a94628e4418db57e691913e5ad7e9aaf4cc7314ef57d93935791caf77d7da3d3da1aae6be8ebe887be1e6b19ead96d799e0d2f126a4ebc4390f4b9df621e9ec0037feeaaab3034a917352b217a375c4c48b835626442bfa1df42bc85e9f104468a5737c727",
+        16,
+    )
+    .unwrap();
+    let check = |x: &IBig, y: &IBig| {
+        let (g, cx, cy) = x.gcd_ext(y);
+        assert_eq!(&cx * x + &cy * y, IBig::from(g.clone()), "gcd_ext({:?}, {:?})", x, y);
+        assert_eq!(g, x.gcd(y));
+    };
+    let (ip, ia) = (IBig::from(p.clone()), IBig::from(a.clone()));
+    for (x, y) in [(&ip, &ia), (&ia, &ip)] {
+        check(x, y);
+        check(&-x, y);
+        check(x, &-y);
+        check(&-x, &-y);
+    }
+    // (the unsigned operands' path)
+    for (x, y, ix, iy) in [(&p, &a, &ip, &ia), (&a, &p, &ia, &ip)] {
+        let (g, cx, cy) = x.gcd_ext(y);
+        assert_eq!(&cx * ix + &cy * iy, IBig::from(g));
+    }
+    for k in -50i32..50 {
+        check(&(&ip + IBig::from(k)), &ia);
+        check(&ip, &(&ia + IBig::from(k)));
+    }
+    // the inverse of a modulo p (gcd 1)
+    let ring = ConstDivisor::new(p.clone());
+    let inv = ring.reduce(a.clone()).inv().unwrap();
+    assert_eq!((inv * ring.reduce(a)).residue(), UBig::ONE);
 }

@@ -4,6 +4,7 @@ use core::mem;
 use dashu_base::{ExtendedGcd, Gcd};
 
 use crate::{
+    add,
     arch::word::{DoubleWord, SignedDoubleWord, SignedWord, Word},
     cmp::cmp_in_place,
     div,
@@ -343,11 +344,13 @@ fn lehmer_ext_step(
 /// Temporary memory required for extended gcd.
 pub fn memory_requirement_ext_up_to(lhs_len: usize, rhs_len: usize) -> Layout {
     // Required memory:
-    // - two numbers (t0 & t1) with at most the same size as lhs, add 1 buffer word
+    // - two numbers (t0 & t1) with at most the same size as lhs, add 2 buffer words: the
+    //   final reduction's update (t0 += x*t1, x not trimmed) spans up to lhs_len + 2 words
+    //   (see gcd_ext_in_place); do not tighten this to 1
     // - temporary space for a division (for euclidean step, see memory_requirement_up_to
     //   for why the loop-wide bound rather than the initial lengths), and later a
     //   multiplication (for coeff update)
-    let t_words = 2 * lhs_len + 2;
+    let t_words = 2 * lhs_len + 4;
     memory::add_layout(
         memory::array_layout::<Word>(t_words),
         memory::max_layout(
@@ -355,6 +358,28 @@ pub fn memory_requirement_ext_up_to(lhs_len: usize, rhs_len: usize) -> Layout {
             mul::memory_requirement_up_to(lhs_len, lhs_len / 2), // for coeff update
         ),
     )
+}
+
+/// `t += (q_top * B^len(q_lo) + q_lo) * t1`, where B is the word base, for a `t` whose
+/// words past the sum's length are zero (the carries propagate into them).
+///
+/// The caller passes `t` long enough for the sum: `len(q_lo) + len(t1) + 1` words and
+/// `t`'s own length + 1, whichever is more. The sum is a Bezout coefficient of the inputs,
+/// at most `lhs` in magnitude, so it always fits; a carry out of `t` would mean a wrong
+/// coefficient, and is a release assertion.
+fn add_mul_into(t: &mut [Word], q_lo: &[Word], q_top: Word, t1: &[Word], memory: &mut Memory) {
+    let qt1_len = q_lo.len() + t1.len();
+    assert!(qt1_len < t.len());
+    let c = mul::add_signed_mul(&mut t[..qt1_len], Sign::Positive, q_lo, t1, memory);
+    debug_assert!(c >= 0);
+    if c > 0 {
+        let overflow = add::add_word_in_place(&mut t[qt1_len..], c as Word);
+        assert!(!overflow, "a Bezout coefficient overflowed its buffer");
+    }
+    if q_top > 0 {
+        let carry = mul::add_mul_word_in_place(&mut t[q_lo.len()..], q_top, t1);
+        assert!(carry == 0, "a Bezout coefficient overflowed its buffer");
+    }
 }
 
 pub fn gcd_ext_in_place(
@@ -373,8 +398,15 @@ pub fn gcd_ext_in_place(
     // the normal way is to have four variables s0, s1, t0, t1 and keep gcd(x, y) = gcd(lhs, rhs),
     // x = s0*lhs - t0*rhs, y = t1*rhs - s1*lhs. Here we simplify it by only tracking the
     // coefficient of rhs, so that x = -t0*rhs mod lhs, y = t1*rhs mod lhs,
-    let (mut t0, mut memory) = memory.allocate_slice_fill::<Word>(lhs_len + 1, 0);
-    let (mut t1, mut memory) = memory.allocate_slice_fill::<Word>(lhs_len + 1, 0);
+    //
+    // Both are zero-filled, and every update below recomputes the length with
+    // `locate_top_word_plus_one` over the words it wrote, so the words past t0_len and
+    // t1_len stay zero. Throughout, t1*x + t0*y = lhs with every term nonnegative (it holds
+    // at the start, 1*lhs + 0*rhs; a euclidean step keeps it; a Lehmer step multiplies it by
+    // a determinant-1 matrix; a swap exchanges both pairs), so t1 <= lhs/x, t0 <= lhs/y: at
+    // most lhs_len words each. The 2 extra words are for the final reduction's span.
+    let (mut t0, mut memory) = memory.allocate_slice_fill::<Word>(lhs_len + 2, 0);
+    let (mut t1, mut memory) = memory.allocate_slice_fill::<Word>(lhs_len + 2, 0);
     let (mut t0_len, mut t1_len) = (1, 1);
     *t1.first_mut().unwrap() = 1;
 
@@ -401,28 +433,17 @@ pub fn gcd_ext_in_place(
                 q_lo = trim_leading_zeros(q_lo);
             }
 
-            // update coefficient t0 += q*t1
+            // update coefficient t0 += q*t1, over all of t0's words: with a small quotient
+            // t0 can be longer than q*t1, and its high words must be kept (and the carry
+            // added into them, not written over them). By the invariant above, len(q_lo) +
+            // t1_len <= (len(x) - len(y)) + (lhs_len - len(x) + 1) < lhs_len and t0_len <=
+            // lhs_len, so `top` is within t0's lhs_len + 2 words.
             let qt1_len = q_lo.len() + t1_len;
-            let mut t_carry = mul::add_signed_mul(
-                &mut t0[..qt1_len],
-                Sign::Positive,
-                q_lo,
-                &t1[..t1_len],
-                &mut memory,
-            ) as Word;
-            if q_top > 0 {
-                t_carry += mul::add_mul_word_in_place(
-                    &mut t0[q_lo.len()..qt1_len.min(lhs_len)],
-                    q_top,
-                    &t1[..t1_len],
-                );
-            }
-            if t_carry > 0 {
-                t0[qt1_len] = t_carry;
-                t0_len = qt1_len + 1;
-            } else {
-                t0_len = locate_top_word_plus_one(&t0[..qt1_len]);
-            }
+            let top = qt1_len.max(t0_len) + 1;
+            assert!(top <= t0.len());
+            debug_assert!(t0[t0_len..top].iter().all(|w| *w == 0));
+            add_mul_into(&mut t0[..top], q_lo, q_top, &t1[..t1_len], &mut memory);
+            t0_len = locate_top_word_plus_one(&t0[..top]);
 
             // swap: (x, y) = (y, r)
             x = mem::replace(&mut y, r);
@@ -435,7 +456,8 @@ pub fn gcd_ext_in_place(
             x = trim_leading_zeros(x);
             y = trim_leading_zeros(y);
 
-            // (t0, t1) = (a*t0 - b*t1, d*t1 - c*t0), here we do unsigned operations.
+            // (t0, t1) = (a*t0 + b*t1, c*t0 + d*t1): the coefficients' magnitudes, which
+            // keep t1*x + t0*y = lhs (unsigned operations).
             let tmax_len = t0_len.max(t1_len);
             let (t0_carry, t1_carry) = lehmer_ext_step(t0, t1, tmax_len, a, b, c, d);
             if t0_carry > 0 {
@@ -483,15 +505,14 @@ pub fn gcd_ext_in_place(
     // x_word = x % y; x /= y
     let y_word = *y.first().unwrap();
     let x_word = div::div_by_word_in_place(x, y_word);
-    t0_len = x.len() + t1_len;
-    debug_assert_zero!(mul::add_signed_mul(
-        &mut t0[..t0_len],
-        Sign::Positive,
-        x,
-        &t1[..t1_len],
-        &mut memory,
-    ));
-    t0_len = locate_top_word_plus_one(&t0[..t0_len]);
+    // t0 += x*t1, over all of t0's words, as in the euclidean step (no input found reaches
+    // it with t0 longer than x*t1, but the same form cannot truncate). x is not trimmed:
+    // len(x) + t1_len <= lhs_len + 1, so `top` is at most lhs_len + 2, t0's length.
+    let top = (x.len() + t1_len).max(t0_len) + 1;
+    assert!(top <= t0.len());
+    debug_assert!(t0[t0_len..top].iter().all(|w| *w == 0));
+    add_mul_into(&mut t0[..top], x, 0, &t1[..t1_len], &mut memory);
+    t0_len = locate_top_word_plus_one(&t0[..top]);
 
     // forward to single word gcd
     let (g_word, cx, cy) = x_word.gcd_ext(y_word);
@@ -514,4 +535,31 @@ pub fn gcd_ext_in_place(
         Sign::Negative
     };
     (1, locate_top_word_plus_one(lhs), sign)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::memory::MemoryAllocation;
+
+    /// A coefficient longer than q * t1: its high words are kept and the carries reach
+    /// them (the euclidean step's update with a small quotient), with and without a top
+    /// quotient word.
+    #[test]
+    fn add_mul_into_keeps_and_carries_into_the_high_words() {
+        let mut allocation = MemoryAllocation::new(mul::memory_requirement_up_to(2, 1));
+        let mut memory = allocation.memory();
+        // t = 5 B^2 + (B - 1) B + (B - 1), q = 1 (q_lo empty, q_top 1), t1 = 1
+        let mut t = [Word::MAX, Word::MAX, 5, 0];
+        add_mul_into(&mut t, &[], 1, &[1], &mut memory);
+        assert_eq!(t, [0, 0, 6, 0]);
+        // q_lo = [2], t1 = [B - 1]: t += 2 (B - 1)
+        let mut t = [Word::MAX, 0, 7, 0];
+        add_mul_into(&mut t, &[2], 0, &[Word::MAX], &mut memory);
+        assert_eq!(t, [Word::MAX - 2, 2, 7, 0]);
+        // a carry out of the product's words, into the high word: t += 1 (B - 1)
+        let mut t = [Word::MAX, Word::MAX, 5, 0];
+        add_mul_into(&mut t, &[1], 0, &[Word::MAX], &mut memory);
+        assert_eq!(t, [Word::MAX - 1, 0, 6, 0]);
+    }
 }
