@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+### Fix
+- The extended gcd of large operands (`gcd_ext`, and the modular inverses built on it)
+  could return the right gcd with wrong Bezout coefficients: a euclidean step with a
+  quotient shorter than the coefficient it updates (`t0 += q * t1` with `t0` longer than
+  `q * t1`) covered only `len(q) + len(t1)` words and wrote the carry over `t0`'s high
+  word. The update now spans all of `t0`'s words and propagates the carries, and a carry
+  out of the coefficient buffer is a release assertion. (Debug builds hit an
+  exact-division assertion on such inputs.)
+
 ### Add
 - `UBig::add_mul_assign`, `IBig::add_mul_assign` and `IBig::sub_mul_assign`: fused
   `x += a * b` and `x -= a * b` that accumulate the product into `x`'s own buffer
